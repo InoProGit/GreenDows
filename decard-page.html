@@ -4,92 +4,206 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Decard Autumn</title>
-    <style>
-    table{
-        border-spacing: 0px;
-        border-collapse: collapse;
-    }
-    td {
-        padding: 5px;
-        border: 1px solid black;
-        text-align: center;
-        cursor: pointer;
-    }
-
-    tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
-        background-color: #80808042;
-
-    }
-     
-    .clicked {
-        z-index: 2;
-        outline: 3px solid red;
-        background-color: cornflowerblue !important;
-    }
-    </style>
 </head>
 <body>
-    <div class="task-desc">
-        <article class="markdown-body entry-content container-lg" itemprop="text"><h1>Дроны</h1>
-            <p>
-                Мйарп склонился над монитором подключенным к древнему радару.
-                Он ждал появления свидрушей с минуты на минуту. Дроны были наготове, единственная проблема была в том,
-                что для поимки свидруша дрону нужны были X/Y координаты сектора относительно базы с координатами 0/0 в декартовой системе координат.
-                Соответственно координаты квадрата, который располагался на карте  справа от базы были 1/0, снизу 0/-1 и т.д.
-            </p>
-            <p>
-                Если бы обычный радар не вышел из строя, Мйарп бы так не переживал.
-                Но древний радар использовал странную систему координат. Каждый квадрат обозначался уникальным числом. База находилась в квадрате 0.
-                Центр карты на радаре выглядел так:
-            </p>
-            <div class="snippet-clipboard-content position-relative overflow-auto">
-                <pre>
-                    <code>
-                        35  15  16  18  20
-                        34  14  1   4   21
-                        33  12  0   6   22
-                        32  10  9   8   24
-                        30  28  27  26  25
-                    </code>
-                </pre>
+   
+
+<!-- 
+    <div class="par-block" style="
+    background: red;
+    top: 0px;
+    left: 0px;
+">
+        <div class="top-block"></div>
+        <div class="body-block"></div>
+    </div>
+    <div class="par-block" style="
+    background: green;
+    left: 0px;
+    left: 0px;
+">
+        <div class="top-block"></div>
+        <div class="body-block"></div>
+    </div>
+    <div class="par-block" style="
+    background: blue;
+    top: 0px;
+    left: 500px;
+">
+        <div class="top-block"></div>
+        <div class="body-block"></div>
+    </div>
+    <div class="par-block" style="
+    background: black;
+    left: 900px;
+    top: 249px;
+    border: 1px solid white;
+">
+        <div class="top-block"></div>
+        <div class="body-block"></div>
+    </div> -->
+    <div id="triger">Click here</div>
+    <!-- 
+    <div class="window-green" task-name="Task">
+        <div class="window-top">
+            <div class="window-minimize">
+                <div class="minimize-1"></div>
+                <div class="minimize-2"></div>
             </div>
-            <p>
-                Дело оставалось за малым - перевести координаты, выдаваемые древним радаром, в координаты понятные дрону.
-                Компьютер понимал любой язык, но Мйарп выбрал свой любимый и набрал
-                <code>define ancientToModern(n int) (x,y int)</code>. Свидрушы приближались...
-            </p>
-        </article>
+            <div class="window-close">
+                <div class="close-line1"></div>
+                <div class="close-line2"></div>
+            </div>
+            <div class="window-line"></div>
+            <div class="window-head"><div class="wh-header">[  ]</div></div>
+        </div>
+        <div class="window-body">
+            
+        </div>
+    </div> -->
+    <div class="window-green widnow-active" task-name="Task">
+        <div class="window-top">
+            <div class="window-minimize">
+                <div class="minimize-1"></div>
+                <div class="minimize-2"></div>
+            </div>
+            <div class="window-close">
+                <div class="close-line1"></div>
+                <div class="close-line2"></div>
+            </div>
+            <div class="window-line"></div>
+        </div>
+        <div class="window-head"><div class="wh-header">[ Task ]</div></div>
+        <div class="window-body">
+            <article class="markdown-body entry-content container-lg" itemprop="text"><h1>Дроны</h1>
+                <p>
+                    Мйарп склонился над монитором подключенным к древнему радару.
+                    Он ждал появления свидрушей с минуты на минуту. Дроны были наготове, единственная проблема была в том,
+                    что для поимки свидруша дрону нужны были X/Y координаты сектора относительно базы с координатами 0/0 в декартовой системе координат.
+                    Соответственно координаты квадрата, который располагался на карте  справа от базы были 1/0, снизу 0/-1 и т.д.
+                </p>
+                <p>
+                    Если бы обычный радар не вышел из строя, Мйарп бы так не переживал.
+                    Но древний радар использовал странную систему координат. Каждый квадрат обозначался уникальным числом. База находилась в квадрате 0.
+                    Центр карты на радаре выглядел так:
+                </p>
+                <div class="snippet-clipboard-content position-relative overflow-auto" style="text-align: center;">
+                    <pre>
+                        <code>
+35  15  16  18  20
+34  14  1   4   21
+33  12  0   6   22
+32  10  9   8   24
+30  28  27  26  25
+                        </code>
+                    </pre>
+                </div>
+                <p>
+                    Дело оставалось за малым - перевести координаты, выдаваемые древним радаром, в координаты понятные дрону.
+                    Компьютер понимал любой язык, но Мйарп выбрал свой любимый и набрал
+                    <code>define ancientToModern(n int) (x,y int)</code>. Свидрушы приближались...
+                </p>
+            </article>
+            <br>
+            <form id="matrix-form" action="#">
+                <label for="matrix-size">Ширина радара: <input id="matrix_size" name="matrix_size" type="number" step="2" min="5" value="5" max="11"></label>
+                <br>
+                <button type="submit">Создать радар</button>
+            </form>
+        </div>
+    </div>
+    <div class="window-green window-radar" task-name="RADAR">
+        <div class="window-top">
+            <div class="window-minimize">
+                <div class="minimize-1"></div>
+                <div class="minimize-2"></div>
+            </div>
+            <div class="window-close">
+                <div class="close-line1"></div>
+                <div class="close-line2"></div>
+            </div>
+            <div class="window-line"></div>
+        </div>
+        <div class="window-head"><div class="wh-header">[ RADAR ]</div></div>
+        <div class="window-body">
+            <table>
+                <tbody id="matrix-graph"></tbody>
+            </table>
+        </div>
     </div>
     
-</article>
-      </div>
-    <form id="matrix-form" action="#">
-        <label for="matrix-size">Ширина матрицы: <input name="matrix_size" type="number" step="2" min="5" value="5" max="20"></label>
-        <br>
-        <button type="submit">Создать что то</button>
-    </form>
+    <div class="window-green window-radar" task-name="Solution">
+        <div class="window-top">
+            <div class="window-minimize">
+                <div class="minimize-1"></div>
+                <div class="minimize-2"></div>
+            </div>
+            <div class="window-close">
+                <div class="close-line1"></div>
+                <div class="close-line2"></div>
+            </div>
+            <div class="window-line"></div>
+        </div>
+        <div class="window-head"><div class="wh-header">[ Solution ]</div></div>
+        <div class="window-body">
+            <pre><code id="code-wrap" class="hljs language-javascript"></code></pre>
+            <br>
+            <div class="author">Styled with <a href="https://highlightjs.org/">highlightjs.org</a></div>
+        </div>
+    </div>
+    <div id="task-panel-wrap">
+        <div id="menu-wrap">
+            <div id="open-tasks">
+                <div id="button-toggle">
+                    <div id="open-menu">Open</div>
+                    <div id="close-menu" style="height: 0px;">Close</div>
+                </div>
+                <div class="menu-text">menu</div>
+            </div>
+        <ul id="task-list">
+            
+        </ul>
 
-    <pre><code>
-        35  15  16  18  20
-        34  14  1   4   21
-        33  12  0   6   22
-        32  10  9   8   24
-        30  28  27  26  25
-        </code></pre>
+        </div>
+        
+        <div id="task-panel">
+            <div class="task-panel-item-empty">
+                This is a task panel, open menu and start your first task...
+            </div>
 
 
-    <table>
-        <tbody id="matrix-graph">
+            <div class="task-panel-item active" task-name="Task">
+                <div class="tpi-title">[ Task ]</div>
+            </div>
 
-        </tbody>
-    </table>
-<script>
-let form = document.getElementById('matrix-form');
+            <div class="task-panel-item" task-name="Solution">
+                <div class="tpi-title">[ Solution ]</div>
+            </div>
+
+            <div class="task-panel-item" task-name="RADAR">
+                <div class="tpi-title">[ RADAR ]</div>
+            </div>
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+
+<script type="text/javascript" src="MenuItemsResponse.js"></script> <!-- json response whit menu data-->
+<script type="text/javascript" src="windowsResponse.js"></script> <!-- json response whit windows data-->
+<script id="main-script">
+let form = document.getElementById("matrix-form");
 
 function spawnRadarVals (size = 5) {
     let radarVals = [];
-    if ( size % 2 === 0 ) return 'Need not even number. Your number - ' + size;
+    if ( size % 2 === 0 ) return size;
     for (let i = 0; radarVals.length < size*size; i++) {
         // first exeptions
         if (i == 1 || i == 0) radarVals.push(i);
@@ -105,6 +219,7 @@ function spawnRadarVals (size = 5) {
 }
 
 function radarToDecard ( radarVals = spawnRadarVals() ) {
+    if ( !Array.isArray(radarVals) ) return 'radarVals must be array. Your data - ' + radarVals;
     let x = 0,
         y = 0,
         comment = '',
@@ -112,17 +227,18 @@ function radarToDecard ( radarVals = spawnRadarVals() ) {
         step = 1,
         stepsCount = 0,
         ratationX = 0,
-        ratationY = 1;
+        ratationY = 1
+    ;
     radarVals.forEach(element => {
         if ( element === 0 ) {
             decard[element] = { // first element is Base
                 x: 0,
                 y: 0,
-                comment: "Base"
+                comment: 'Base'
             };
             return true;
         }
-            if /*  */ ( ratationX === 0 && ratationY === 1 ) { // Up
+            if /*--*/ ( ratationX === 0 && ratationY === 1 ) { // Up
                 y++;
                 if ( stepsCount === 0 && element !== radarVals[1] ) step++;
                 stepsCount++;
@@ -166,8 +282,338 @@ function radarToDecard ( radarVals = spawnRadarVals() ) {
     return decard;
 }
 
+function spawnRadar ( radarObj = radarToDecard(spawnRadarVals(11)) ) {
+    let radarElemnt = document.getElementById("matrix-graph"),
+        prevX = null
+    ;
+        radarElemnt.innerHTML = '';
+    for (let value in radarObj) {
+        let x = radarObj[value].x,
+            y = radarObj[value].y,
+            afterBegin = 'afterBegin',
+            currRow = document.querySelector(`[row-decard-y="${y}"]`),
+            spawnX = (  ) => {
+                if ( currRow.firstChild !== null ) {
+                    x < currRow.firstChild.getAttribute('decard-x') ? afterBegin = 'afterBegin' : afterBegin = 'beforeEnd';
+                }
 
-console.log( radarToDecard( spawnRadarVals(11) ) );
+                currRow.insertAdjacentHTML(afterBegin, `<td decard-x="${x}" decard-y="${y}">${value}</td>`);
+            }
+        ;
+
+        if ( !currRow ) { // spawn first Y row
+            if ( radarElemnt.firstChild == null ) {
+                let newRow = document.createElement('tr');
+                newRow.setAttribute('row-decard-y', y);
+                radarElemnt.prepend(newRow);
+                currRow = document.querySelector(`[row-decard-y="${y}"]`);
+                spawnX();
+                currRow.firstChild.classList.add('base');
+            } else { // spawn Y rows
+                if ( !document.querySelector(`[row-decard-y="${y}"]`) ) {
+                    y > radarElemnt.firstChild.getAttribute('row-decard-y') ? afterBegin = 'afterBegin' : afterBegin = 'beforeEnd';
+                    radarElemnt.insertAdjacentHTML(afterBegin, `<tr row-decard-y="${y}" "></tr>`);
+                }
+                currRow = document.querySelector(`[row-decard-y="${y}"]`);
+                spawnX();
+            }
+        } else if ( currRow ) {
+                spawnX();
+        } else {
+            console.log('Something wrong with Y row. His value :');
+            // console.log(currRow);
+        }
+    }
+}
+spawnRadar();
+
+// console.log( radarToDecard( spawnRadarVals(11) ) );
+
+form.onsubmit = function () {
+    let number = document.getElementById("matrix_size").value;
+    spawnRadar( radarToDecard( spawnRadarVals(number) ) );
+    document.getElementById("matrix-graph").closest(".window-green").style.zIndex = currentZindex++;
+    console.log( document.getElementById("matrix_size").value );
+    console.log( radarToDecard( spawnRadarVals(document.getElementById("matrix_size").value) ) );
+    return false;
+};
+
+const classesArray = [".window-minimize", ".window-close", ".window-line"];
+
+
+async function animateWindow (element = [], cssClass = "hide-height", width = false, height = false) {
+    element.classList.add("transition");
+    isNaN(parseInt(width)) ? width = false : width = parseInt(width);
+    isNaN(parseInt(height)) ? height = false : height = parseInt(height);
+    let promise = new Promise((resolve, reject) => {
+        if ( Array.isArray(element) ) {
+            element.forEach( element => {
+                element.style.width = element.offsetWidth + 'px';
+                element.style.height = element.offsetHeight + 'px';
+                setTimeout( () => element.classList.add(cssClass), 5000);
+            });
+        } else {
+            let padding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding'));
+            
+
+            if ( padding === 0 ) {
+                element.setAttribute('initial-width', element.offsetWidth + 'px');
+                element.setAttribute('initial-height', element.offsetHeight + 'px');
+                width ? element.style.width = width + 'px' : element.style.width = element.offsetWidth + 'px';
+                height ? element.style.height = height + 'px' : element.style.height = element.offsetHeight + 'px';
+            } else {
+                element.setAttribute('initial-width', element.offsetWidth - padding*2 + 'px');
+                element.setAttribute('initial-height', element.offsetHeight - padding*2 + 'px');
+                width ? element.style.width = width + 'px' : element.style.width = element.offsetWidth - padding*2 + 'px';
+                height ? element.style.height = height + 'px' : element.style.height = element.offsetHeight - padding*2 + 'px';
+            }
+            !width && !height ? setTimeout( () => resolve(element.classList.add(cssClass)), 350) : false;
+            
+        }
+    });
+    let result = await promise;
+}
+
+
+[].forEach.call( document.querySelectorAll(".window-close"), function(el) {
+    el.onclick = async function(event) {
+        let windowGreen = event.target.closest(".window-green"),
+            windowTop = event.target.closest(".window-top"),
+            windowHead = event.target.closest(".window-green").querySelector(".window-head"),
+            windowBody = event.target.closest(".window-green").querySelector(".window-body"),
+            windowHeader = event.target.closest(".window-green").querySelector(".wh-header")
+        ;
+        
+        await animateWindow(windowGreen, "hide-background");
+        await animateWindow(windowBody, "hide-height");
+              animateWindow(windowGreen, "", 0, 25);
+        await animateWindow(windowTop, "hide-width");
+        await animateWindow(windowTop, "hide-padding");
+        await animateWindow(windowTop, "hide-height");
+        await animateWindow(windowBody, "hide-margin");
+              animateWindow(windowBody, "hide-height");
+              windowHead.style.position = "relative";
+              animateWindow(windowHead, "hide-margin");
+        
+              animateWindow(windowGreen, "", windowHeader.offsetWidth + 10, 0);
+              animateWindow(windowHead, "", windowHeader.offsetWidth + 10, 0);
+
+        console.log(windowHeader.offsetWidth);
+    }
+});
+
+
+let windowHeads = document.querySelectorAll(".window-head"),
+    currentZindex = 5;
+
+windowHeads.forEach(function (windowHead) {
+    let windowMine = windowHead.closest(".window-green");
+
+    windowHead.onmousedown = function(e) {
+        focuseWindow(e.target.closest(".window-green"));
+
+    let coords = getCoords(windowMine),
+        shiftX = e.pageX - coords.left,
+        shiftY = e.pageY - coords.top
+    ;
+
+    windowMine.style.position = 'absolute';
+    moveAt(e);
+
+    windowMine.style.zIndex = currentZindex++; // над другими элементами
+
+    function moveAt(e) {
+        windowMine.style.left = e.pageX - shiftX + 'px';
+        windowMine.style.top = e.pageY - shiftY + 'px';
+    }
+
+    document.onmousemove = function(e) {
+        moveAt(e);
+    };
+
+    windowHead.onmouseup = function() {
+        document.onmousemove = null;
+        windowMine.onmouseup = null;
+    };
+
+    }
+
+    windowHead.ondragstart = function() {
+        return false;
+    };
+
+    function getCoords(elem) {
+        let box = elem.getBoundingClientRect();
+        return {
+            top: box.top + pageYOffset,
+            left: box.left + pageXOffset
+        };
+    }
+
+});
+
+
+
+document.getElementById("open-tasks").addEventListener( "click" , function (event) {
+    if ( document.getElementById("menu-wrap").classList.contains("active") ) {
+        document.getElementById("menu-wrap").classList.remove("active");
+        document.getElementById("button-toggle").style.top = '0';
+    } else {
+        document.getElementById("menu-wrap").classList.add("active");
+        document.getElementById("button-toggle").style.top = '-1.7em';
+    }
+});
+
+
+document.addEventListener( "click" , function (event) {
+    if ( document.getElementById("menu-wrap").classList.contains("active") && !event.target.closest("#menu-wrap") ) {
+        document.getElementById("menu-wrap").classList.remove("active");
+        document.getElementById("button-toggle").style.top = '0';
+        // console.log(event.target);
+    }
+});
+
+
+
+function setTasksMargin () {
+    let taskPanelItems = document.querySelectorAll(".task-panel-item"),
+        taskPanelItemsCount = taskPanelItems.length,
+        taskPanelItemsWidth = 0;
+        taskPanel = document.getElementById("task-panel"),
+        itemsMargin = 0
+    ;
+    
+    taskPanelItems.forEach( function (element) { 
+        taskPanelItemsWidth = taskPanelItemsWidth + element.clientWidth;
+    });
+
+    itemsMargin = (taskPanel.clientWidth - taskPanelItemsWidth) / ( 2*taskPanelItemsCount ) - 1.5 ;
+
+    itemsMargin < 10 ? itemsMargin = 10 : false;
+
+    taskPanelItems.forEach( function (element) { 
+        element.style.margin = `0 ${itemsMargin}px`;
+    });
+
+}
+
+
+function initializeMenu () {
+    let menuWrap = document.getElementById("menu-wrap"),
+        menuListHeight = document.getElementById("task-list").clientHeight
+    ;
+    menuWrap.style.bottom = `-${menuListHeight + 9}px`;
+}
+
+
+
+
+
+
+// function spawnWindow ( windowObj ) {
+
+// }
+
+
+
+
+function focuseInWindow ( element, borderWidth ) {
+    element.classList.add("widnow-active");
+    element.style.zIndex = currentZindex++;
+    element.style.top = parseInt(element.style.top) - borderWidth + 'px';
+    element.style.left = parseInt(element.style.left) - borderWidth + 'px';
+}
+
+function focuseOutWindow ( activeElement, borderWidth ) {
+
+    activeElement.style.top = parseInt(activeElement.style.top) + borderWidth + 'px';
+    activeElement.style.left = parseInt(activeElement.style.left) + borderWidth + 'px';
+    document.querySelector(".window-green.widnow-active").classList.remove("widnow-active");
+}
+
+
+
+
+function focuseWindow (element) {
+    if ( element.classList.contains("widnow-active") ) {
+        return false;
+    }
+    let activeElement = document.querySelector(".window-green.widnow-active"),
+        activeTaskItem = document.querySelector('.task-panel-item.active'),
+        borderWidth = parseInt(window.getComputedStyle(activeElement, null).getPropertyValue('border-width'))
+    ;
+    if ( document.querySelector(".task-panel-item.active") ) {
+        document.querySelector(".task-panel-item.active").classList.remove("active");
+    } else {
+        console.error('U dont have active task on panel to activate!');
+    }
+
+    focuseOutWindow(activeElement, borderWidth );
+    if ( document.querySelector(`.task-panel-item[task-name="${element.getAttribute('task-name')}"]`) ) {
+        document.querySelector(`.task-panel-item[task-name="${element.getAttribute('task-name')}"]`).classList.add("active");
+    } else {
+        console.error('U dont have task on panel to activate!');
+    }
+
+    focuseInWindow(element, borderWidth);
+
+}
+
+
+
+function focuseWindowFromTP (element) {
+    if ( element.classList.contains("active") ) {
+        return false;
+    }
+    focuseWindow(document.querySelector(`.window-green[task-name="${element.getAttribute('task-name')}"]`));
+
+}
+
+[].forEach.call( document.querySelectorAll(".window-green"), function(element) {
+    element.onclick = function(event) {
+        focuseWindow (this)
+    }
+});
+
+[].forEach.call( document.querySelectorAll(".task-panel-item"), function(element) {
+    element.onclick = function(event) {
+        focuseWindowFromTP (this)
+    }
+});
+
+
+
+const jsonMenuItemsData = JSON.parse(jsonMenuItemsResponse); // response like graphQL in file
+
+
+function spawnMenuItems (jsonMenuItems = {} ) {
+    let menuElement = document.getElementById("task-list");
+
+    jsonMenuItems.tasks.forEach(function (task) {
+            let menuItem = `
+                <li class="task-list-item" task-name="${task.name}"  task-id="${task.id}">
+                    <div class="task-list-link">${task.name}</div>
+                    <div class="task-data">
+                    </div>
+                </li>
+                `;
+            
+                menuElement.insertAdjacentHTML('beforeEnd', menuItem);
+    });
+
+    initializeMenu();
+}
+
+
+spawnMenuItems (jsonMenuItemsData);
+
+setTasksMargin();
+
+
+
+
+
+
 
 
 
@@ -177,5 +623,13 @@ console.log( radarToDecard( spawnRadarVals(11) ) );
 
 
 </script>
+<script>
+    document.getElementById("code-wrap").append(document.getElementById("main-script").innerHTML);
+    // console.log( document.getElementById("main-script").innerHTML );
+</script>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/styles/atom-one-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
 </body>
 </html>
