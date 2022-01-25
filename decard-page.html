@@ -63,7 +63,7 @@
             
         </div>
     </div> -->
-    <div class="window-green widnow-active" task-name="Task">
+    <div class="window-green active" task-name="Task">
         <div class="window-top">
             <div class="window-minimize">
                 <div class="minimize-1"></div>
@@ -153,7 +153,7 @@
             <div class="author">Styled with <a href="https://highlightjs.org/">highlightjs.org</a></div>
         </div>
     </div>
-    <div id="task-panel-wrap">
+    <div id="taskbar-wrap">
         <div id="menu-wrap">
             <div id="open-tasks">
                 <div id="button-toggle">
@@ -168,21 +168,21 @@
 
         </div>
         
-        <div id="task-panel">
-            <div class="task-panel-item-empty">
-                This is a task panel, open menu and start your first task...
+        <div id="taskbar">
+            <div class="taskbar-item-empty">
+                This is a taskbar, open menu and start your first task...
             </div>
 
 
-            <div class="task-panel-item active" task-name="Task">
+            <div class="taskbar-item active" task-name="Task">
                 <div class="tpi-title">[ Task ]</div>
             </div>
 
-            <div class="task-panel-item" task-name="Solution">
+            <div class="taskbar-item" task-name="Solution">
                 <div class="tpi-title">[ Solution ]</div>
             </div>
 
-            <div class="task-panel-item" task-name="RADAR">
+            <div class="taskbar-item" task-name="RADAR">
                 <div class="tpi-title">[ RADAR ]</div>
             </div>
 
@@ -199,8 +199,7 @@
 <script type="text/javascript" src="MenuItemsResponse.js"></script> <!-- json response whit menu data-->
 <script type="text/javascript" src="windowsResponse.js"></script> <!-- json response whit windows data-->
 <script id="main-script">
-let form = document.getElementById("matrix-form");
-
+// generating array with composite numbers
 function spawnRadarVals (size = 5) {
     let radarVals = [];
     if ( size % 2 === 0 ) return size;
@@ -217,7 +216,9 @@ function spawnRadarVals (size = 5) {
     }
     return radarVals;
 }
+//
 
+// transition simple array with nums into object with decard coords
 function radarToDecard ( radarVals = spawnRadarVals() ) {
     if ( !Array.isArray(radarVals) ) return 'radarVals must be array. Your data - ' + radarVals;
     let x = 0,
@@ -281,7 +282,9 @@ function radarToDecard ( radarVals = spawnRadarVals() ) {
     });
     return decard;
 }
+//
 
+// spawning radar matrix
 function spawnRadar ( radarObj = radarToDecard(spawnRadarVals(11)) ) {
     let radarElemnt = document.getElementById("matrix-graph"),
         prevX = null
@@ -325,22 +328,19 @@ function spawnRadar ( radarObj = radarToDecard(spawnRadarVals(11)) ) {
         }
     }
 }
-spawnRadar();
+//
 
-// console.log( radarToDecard( spawnRadarVals(11) ) );
-
+// render matrix on submit button in task window
+let form = document.getElementById("matrix-form");
 form.onsubmit = function () {
     let number = document.getElementById("matrix_size").value;
     spawnRadar( radarToDecard( spawnRadarVals(number) ) );
     document.getElementById("matrix-graph").closest(".window-green").style.zIndex = currentZindex++;
-    console.log( document.getElementById("matrix_size").value );
-    console.log( radarToDecard( spawnRadarVals(document.getElementById("matrix_size").value) ) );
     return false;
 };
+//
 
-const classesArray = [".window-minimize", ".window-close", ".window-line"];
-
-
+// function animate for closing window
 async function animateWindow (element = [], cssClass = "hide-height", width = false, height = false) {
     element.classList.add("transition");
     isNaN(parseInt(width)) ? width = false : width = parseInt(width);
@@ -373,8 +373,9 @@ async function animateWindow (element = [], cssClass = "hide-height", width = fa
     });
     let result = await promise;
 }
+//
 
-
+// closing window on close button
 [].forEach.call( document.querySelectorAll(".window-close"), function(el) {
     el.onclick = async function(event) {
         let windowGreen = event.target.closest(".window-green"),
@@ -401,40 +402,35 @@ async function animateWindow (element = [], cssClass = "hide-height", width = fa
         console.log(windowHeader.offsetWidth);
     }
 });
+//
 
-
+// moving window by drug heading
 let windowHeads = document.querySelectorAll(".window-head"),
     currentZindex = 5;
-
 windowHeads.forEach(function (windowHead) {
     let windowMine = windowHead.closest(".window-green");
 
     windowHead.onmousedown = function(e) {
-        focuseWindow(e.target.closest(".window-green"));
-
-    let coords = getCoords(windowMine),
-        shiftX = e.pageX - coords.left,
-        shiftY = e.pageY - coords.top
-    ;
-
-    windowMine.style.position = 'absolute';
-    moveAt(e);
-
-    windowMine.style.zIndex = currentZindex++; // над другими элементами
-
-    function moveAt(e) {
-        windowMine.style.left = e.pageX - shiftX + 'px';
-        windowMine.style.top = e.pageY - shiftY + 'px';
-    }
-
-    document.onmousemove = function(e) {
+        focusWindow(e.target.closest(".window-green"));
+        let coords = getCoords(windowMine),
+            shiftX = e.pageX - coords.left,
+            shiftY = e.pageY - coords.top
+        ;
+        windowMine.style.position = 'absolute';
         moveAt(e);
-    };
-
-    windowHead.onmouseup = function() {
-        document.onmousemove = null;
-        windowMine.onmouseup = null;
-    };
+        windowMine.style.zIndex = currentZindex++; // z-index priority
+        
+        function moveAt(e) {
+            windowMine.style.left = e.pageX - shiftX + 'px';
+            windowMine.style.top = e.pageY - shiftY + 'px';
+        }
+        document.onmousemove = function(e) {
+            moveAt(e);
+        };
+        windowHead.onmouseup = function() {
+            document.onmousemove = null;
+            windowMine.onmouseup = null;
+        };
 
     }
 
@@ -449,11 +445,10 @@ windowHeads.forEach(function (windowHead) {
             left: box.left + pageXOffset
         };
     }
-
 });
+//
 
-
-
+// main menu opening
 document.getElementById("open-tasks").addEventListener( "click" , function (event) {
     if ( document.getElementById("menu-wrap").classList.contains("active") ) {
         document.getElementById("menu-wrap").classList.remove("active");
@@ -463,48 +458,48 @@ document.getElementById("open-tasks").addEventListener( "click" , function (even
         document.getElementById("button-toggle").style.top = '-1.7em';
     }
 });
-
-
+//
+// main menu closing
 document.addEventListener( "click" , function (event) {
     if ( document.getElementById("menu-wrap").classList.contains("active") && !event.target.closest("#menu-wrap") ) {
         document.getElementById("menu-wrap").classList.remove("active");
         document.getElementById("button-toggle").style.top = '0';
-        // console.log(event.target);
     }
 });
+//
 
-
-
+// set margins inside taskbar
 function setTasksMargin () {
-    let taskPanelItems = document.querySelectorAll(".task-panel-item"),
-        taskPanelItemsCount = taskPanelItems.length,
-        taskPanelItemsWidth = 0;
-        taskPanel = document.getElementById("task-panel"),
+    let taskbarItems = document.querySelectorAll(".taskbar-item"),
+        taskbarItemsCount = taskbarItems.length,
+        taskbarItemsWidth = 0;
+        taskbar = document.getElementById("taskbar"),
         itemsMargin = 0
     ;
     
-    taskPanelItems.forEach( function (element) { 
-        taskPanelItemsWidth = taskPanelItemsWidth + element.clientWidth;
+    taskbarItems.forEach( function (element) { 
+        taskbarItemsWidth = taskbarItemsWidth + element.clientWidth;
     });
 
-    itemsMargin = (taskPanel.clientWidth - taskPanelItemsWidth) / ( 2*taskPanelItemsCount ) - 1.5 ;
+    itemsMargin = (taskbar.clientWidth - taskbarItemsWidth) / ( 2*taskbarItemsCount ) - 1.5 ;
 
     itemsMargin < 10 ? itemsMargin = 10 : false;
 
-    taskPanelItems.forEach( function (element) { 
+    taskbarItems.forEach( function (element) { 
         element.style.margin = `0 ${itemsMargin}px`;
     });
 
 }
+//
 
-
+// moving menu to starting position
 function initializeMenu () {
     let menuWrap = document.getElementById("menu-wrap"),
         menuListHeight = document.getElementById("task-list").clientHeight
     ;
     menuWrap.style.bottom = `-${menuListHeight + 9}px`;
 }
-
+//
 
 
 
@@ -516,79 +511,95 @@ function initializeMenu () {
 
 
 
-
-function focuseInWindow ( element, borderWidth ) {
-    element.classList.add("widnow-active");
+// window focus in
+function focusInWindow ( element, borderWidth ) {
+    element.classList.add("active");
     element.style.zIndex = currentZindex++;
     element.style.top = parseInt(element.style.top) - borderWidth + 'px';
     element.style.left = parseInt(element.style.left) - borderWidth + 'px';
 }
+//
 
-function focuseOutWindow ( activeElement, borderWidth ) {
+// window focus out
+function focusOutWindow ( activeElement, borderWidth ) {
 
     activeElement.style.top = parseInt(activeElement.style.top) + borderWidth + 'px';
     activeElement.style.left = parseInt(activeElement.style.left) + borderWidth + 'px';
-    document.querySelector(".window-green.widnow-active").classList.remove("widnow-active");
+    document.querySelector(".window-green.active").classList.remove("active");
 }
+//
 
-
-
-
-function focuseWindow (element) {
-    if ( element.classList.contains("widnow-active") ) {
-        return false;
-    }
-    let activeElement = document.querySelector(".window-green.widnow-active"),
-        activeTaskItem = document.querySelector('.task-panel-item.active'),
-        borderWidth = parseInt(window.getComputedStyle(activeElement, null).getPropertyValue('border-width'))
-    ;
-    if ( document.querySelector(".task-panel-item.active") ) {
-        document.querySelector(".task-panel-item.active").classList.remove("active");
+// activate task in taskbar
+function activateTaskInTaskbar ( elementAttribute ) {
+    let element = document.querySelector(`.taskbar-item[task-name="${elementAttribute}"]`);
+    if ( element ) {
+        element.classList.add("active");
     } else {
-        console.error('U dont have active task on panel to activate!');
+        console.error('U dont have task on taskbar to activate!');
     }
-
-    focuseOutWindow(activeElement, borderWidth );
-    if ( document.querySelector(`.task-panel-item[task-name="${element.getAttribute('task-name')}"]`) ) {
-        document.querySelector(`.task-panel-item[task-name="${element.getAttribute('task-name')}"]`).classList.add("active");
-    } else {
-        console.error('U dont have task on panel to activate!');
-    }
-
-    focuseInWindow(element, borderWidth);
-
 }
+//
 
+// remove class "active" from elemen with 'selector'
+function deactivate ( selector ) {
+    let activeItem = document.querySelector(selector);
+    if ( activeItem ) {
+        activeItem.classList.remove("active");
+    } else {
+        console.error('U dont have active elemnt to deactivate!');
+    }
+}
+//
 
-
-function focuseWindowFromTP (element) {
+// doing focus on window
+function focusWindow ( element ) {
     if ( element.classList.contains("active") ) {
         return false;
     }
-    focuseWindow(document.querySelector(`.window-green[task-name="${element.getAttribute('task-name')}"]`));
+    let activeElement = document.querySelector(".window-green.active"),
+        borderWidth = parseInt(window.getComputedStyle(activeElement, null).getPropertyValue('border-width'))
+    ;
+
+    focusOutWindow(activeElement, borderWidth );
+    deactivate('.taskbar-item.active');
+    activateTaskInTaskbar(element.getAttribute('task-name'));
+    focusInWindow(element, borderWidth);
 
 }
+//
 
+// focusing window from click on taskbar element
+function focusWindowFromTB (element) {
+    if ( element.classList.contains("active") ) {
+        return false;
+    }
+    focusWindow(document.querySelector(`.window-green[task-name="${element.getAttribute('task-name')}"]`));
+}
+//
+
+// hang window focus handler on window
 [].forEach.call( document.querySelectorAll(".window-green"), function(element) {
     element.onclick = function(event) {
-        focuseWindow (this)
+        focusWindow(this)
     }
 });
+//
 
-[].forEach.call( document.querySelectorAll(".task-panel-item"), function(element) {
+// hang window focus handler on taskbar item
+[].forEach.call( document.querySelectorAll(".taskbar-item"), function(element) {
     element.onclick = function(event) {
-        focuseWindowFromTP (this)
+        focusWindowFromTB(this)
     }
 });
+//
 
+// imagine this is response like graphQL (but in file)
+const jsonMenuItemsData = JSON.parse(jsonMenuItemsResponse);
+//
 
-
-const jsonMenuItemsData = JSON.parse(jsonMenuItemsResponse); // response like graphQL in file
-
-
+// creating menu items from "service" response
 function spawnMenuItems (jsonMenuItems = {} ) {
     let menuElement = document.getElementById("task-list");
-
     jsonMenuItems.tasks.forEach(function (task) {
             let menuItem = `
                 <li class="task-list-item" task-name="${task.name}"  task-id="${task.id}">
@@ -597,18 +608,19 @@ function spawnMenuItems (jsonMenuItems = {} ) {
                     </div>
                 </li>
                 `;
-            
                 menuElement.insertAdjacentHTML('beforeEnd', menuItem);
     });
-
     initializeMenu();
 }
+//
 
+// functions to render page
+spawnRadar();
 
-spawnMenuItems (jsonMenuItemsData);
+spawnMenuItems(jsonMenuItemsData);
 
 setTasksMargin();
-
+//
 
 
 
@@ -624,6 +636,7 @@ setTasksMargin();
 
 </script>
 <script>
+    // inputting code in highlighted window
     document.getElementById("code-wrap").append(document.getElementById("main-script").innerHTML);
     // console.log( document.getElementById("main-script").innerHTML );
 </script>

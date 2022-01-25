@@ -115,7 +115,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     left: 5px;
 }
 
-.widnow-active {
+.window-green.active {
     z-index: 5;
     border: 10px inset #33ff33;
 }
@@ -214,7 +214,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     overflow: overlay;
 }
 
-#task-panel-wrap {
+#taskbar-wrap {
     position: absolute;
     height: 3em;
     width: 100%;
@@ -322,7 +322,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     margin-right: auto;
 }
 
-.task-panel-item-empty {
+.taskbar-item-empty {
     width: 60%;
     height: 60%;
     min-width: 400px;
@@ -343,7 +343,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 }
 
 
-#task-panel {
+#taskbar {
     margin: auto;
     width: 80%;
     height: 100%;
@@ -384,7 +384,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 
 
-.task-panel-item {
+.taskbar-item {
     border-radius: 10px;
     margin: 0;
     transition: 1s;
@@ -403,7 +403,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     font-weight: 500;
 }
 
-.task-panel-item.active .tpi-title {
+.taskbar-item.active .tpi-title {
     background: green;
 }
 
