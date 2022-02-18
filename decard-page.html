@@ -196,8 +196,8 @@
         </div>
     </div>
 
-<script type="text/javascript" src="MenuItemsResponse.js"></script> <!-- json response whit menu data-->
-<script type="text/javascript" src="windowsResponse.js"></script> <!-- json response whit windows data-->
+<script type="text/javascript" src="menuItemsResponse.js"></script> <!-- json response whit menu data-->
+<script type="text/javascript" src="menuWindowsResponse.js"></script> <!-- json response whit windows data-->
 <script id="main-script">
 // generating array with composite numbers
 function spawnRadarVals (size = 5) {
@@ -341,7 +341,7 @@ form.onsubmit = function () {
 //
 
 // function animate for closing window
-async function animateWindow (element = [], cssClass = "hide-height", width = false, height = false) {
+async function animateWindow (element = [] || {}, cssClass = "hide-height", width = false, height = false) {
     element.classList.add("transition");
     isNaN(parseInt(width)) ? width = false : width = parseInt(width);
     isNaN(parseInt(height)) ? height = false : height = parseInt(height);
@@ -375,9 +375,36 @@ async function animateWindow (element = [], cssClass = "hide-height", width = fa
 }
 //
 
+// hang any function onClick by selector
+function forEachClick ( selector = '', func = function(){} ) {
+    [].forEach.call( document.querySelectorAll(selector), function(element) {
+        element.onclick = function(event) {
+            func(this)
+        }
+    });
+}
+//
+
+// hang any function by selector
+function forEachFunc ( selector = '', func = function(){} ) {
+    document.querySelectorAll(selector).forEach( function(element) {
+        func(element);
+    });
+}
+//
+
+// input element before #taskbar
+function spawnHtml ( elementHTML = '', positionTop = 0, positionLeft = 0 ) {
+    let taskbar = document.getElementById('taskbar-wrap');
+    taskbar.insertAdjacentHTML('beforebegin', elementHTML);
+    ( positionTop !== 0 ) ? elementHTML.style.top = positionTop + 'px' : false;
+    ( positionLeft !== 0 ) ? elementHTML.style.left = positionLeft + 'px' : false;
+}
+//
+
 // closing window on close button
-[].forEach.call( document.querySelectorAll(".window-close"), function(el) {
-    el.onclick = async function(event) {
+function closeWindow ( element ) {
+    element.onclick = async function(event) {
         let windowGreen = event.target.closest(".window-green"),
             windowTop = event.target.closest(".window-top"),
             windowHead = event.target.closest(".window-green").querySelector(".window-head"),
@@ -401,35 +428,34 @@ async function animateWindow (element = [], cssClass = "hide-height", width = fa
 
         console.log(windowHeader.offsetWidth);
     }
-});
+}
 //
 
 // moving window by drug heading
-let windowHeads = document.querySelectorAll(".window-head"),
-    currentZindex = 5;
-windowHeads.forEach(function (windowHead) {
-    let windowMine = windowHead.closest(".window-green");
+let currentZindex = 5;
+function windowsDraging ( windowHead ) {
+    let currentWindow = windowHead.closest(".window-green");
 
     windowHead.onmousedown = function(e) {
         focusWindow(e.target.closest(".window-green"));
-        let coords = getCoords(windowMine),
+        let coords = getCoords(currentWindow),
             shiftX = e.pageX - coords.left,
             shiftY = e.pageY - coords.top
         ;
-        windowMine.style.position = 'absolute';
+        currentWindow.style.position = 'absolute';
         moveAt(e);
-        windowMine.style.zIndex = currentZindex++; // z-index priority
+        currentWindow.style.zIndex = currentZindex++; // z-index priority
         
         function moveAt(e) {
-            windowMine.style.left = e.pageX - shiftX + 'px';
-            windowMine.style.top = e.pageY - shiftY + 'px';
+            currentWindow.style.left = e.pageX - shiftX + 'px';
+            currentWindow.style.top = e.pageY - shiftY + 'px';
         }
         document.onmousemove = function(e) {
             moveAt(e);
         };
         windowHead.onmouseup = function() {
             document.onmousemove = null;
-            windowMine.onmouseup = null;
+            currentWindow.onmouseup = null;
         };
 
     }
@@ -445,11 +471,13 @@ windowHeads.forEach(function (windowHead) {
             left: box.left + pageXOffset
         };
     }
-});
+}
+// hang draging function on elements
+forEachFunc(".window-head", windowsDraging);
 //
 
 // main menu opening
-document.getElementById("open-tasks").addEventListener( "click" , function (event) {
+document.getElementById("open-tasks").addEventListener( 'click' , function (event) {
     if ( document.getElementById("menu-wrap").classList.contains("active") ) {
         document.getElementById("menu-wrap").classList.remove("active");
         document.getElementById("button-toggle").style.top = '0';
@@ -460,7 +488,7 @@ document.getElementById("open-tasks").addEventListener( "click" , function (even
 });
 //
 // main menu closing
-document.addEventListener( "click" , function (event) {
+document.addEventListener( 'click' , function (event) {
     if ( document.getElementById("menu-wrap").classList.contains("active") && !event.target.closest("#menu-wrap") ) {
         document.getElementById("menu-wrap").classList.remove("active");
         document.getElementById("button-toggle").style.top = '0';
@@ -476,7 +504,7 @@ function setTasksMargin () {
         taskbar = document.getElementById("taskbar"),
         itemsMargin = 0
     ;
-    
+    taskbar.style.overflow = 'hidden';
     taskbarItems.forEach( function (element) { 
         taskbarItemsWidth = taskbarItemsWidth + element.clientWidth;
     });
@@ -488,7 +516,11 @@ function setTasksMargin () {
     taskbarItems.forEach( function (element) { 
         element.style.margin = `0 ${itemsMargin}px`;
     });
-
+    setTimeout(() => {
+        taskbar.style.overflow = 'unset';
+        taskbar.style.overflowY = 'hidden';
+    }, 750);
+    
 }
 //
 
@@ -500,16 +532,6 @@ function initializeMenu () {
     menuWrap.style.bottom = `-${menuListHeight + 9}px`;
 }
 //
-
-
-
-
-
-// function spawnWindow ( windowObj ) {
-
-// }
-
-
 
 // window focus in
 function focusInWindow ( element, borderWidth ) {
@@ -530,7 +552,7 @@ function focusOutWindow ( activeElement, borderWidth ) {
 //
 
 // activate task in taskbar
-function activateTaskInTaskbar ( elementAttribute ) {
+function activateTaskInTaskbar ( elementAttribute = '' ) {
     let element = document.querySelector(`.taskbar-item[task-name="${elementAttribute}"]`);
     if ( element ) {
         element.classList.add("active");
@@ -541,12 +563,19 @@ function activateTaskInTaskbar ( elementAttribute ) {
 //
 
 // remove class "active" from elemen with 'selector'
-function deactivate ( selector ) {
-    let activeItem = document.querySelector(selector);
-    if ( activeItem ) {
-        activeItem.classList.remove("active");
+function deactivate ( selector = '' || {} ) {
+
+    if ( typeof selector === "string" ) {
+        let activeItem = document.querySelector(selector);
+        if ( activeItem ) {
+            activeItem.classList.remove('active');
+        } else {
+            console.error('U dont have active elemnt to deactivate!');
+        }
+    } else if ( typeof selector === "object" ) {
+        selector.classList.remove('active');
     } else {
-        console.error('U dont have active elemnt to deactivate!');
+        console.error('Use me better, i know u can!');
     }
 }
 //
@@ -569,7 +598,7 @@ function focusWindow ( element ) {
 //
 
 // focusing window from click on taskbar element
-function focusWindowFromTB (element) {
+function focusWindowFromTB ( element ) {
     if ( element.classList.contains("active") ) {
         return false;
     }
@@ -577,28 +606,13 @@ function focusWindowFromTB (element) {
 }
 //
 
-// hang window focus handler on window
-[].forEach.call( document.querySelectorAll(".window-green"), function(element) {
-    element.onclick = function(event) {
-        focusWindow(this)
-    }
-});
-//
-
-// hang window focus handler on taskbar item
-[].forEach.call( document.querySelectorAll(".taskbar-item"), function(element) {
-    element.onclick = function(event) {
-        focusWindowFromTB(this)
-    }
-});
-//
-
-// imagine this is response like graphQL (but in file)
+// imagine this is responses like graphQL (but in files)
 const jsonMenuItemsData = JSON.parse(jsonMenuItemsResponse);
+const jsonWindowItemsData = JSON.parse(jsonWindowItemsResponse); // here all results for simple adding new data in file
 //
 
 // creating menu items from "service" response
-function spawnMenuItems (jsonMenuItems = {} ) {
+function spawnMenuItems ( jsonMenuItems = {} ) {
     let menuElement = document.getElementById("task-list");
     jsonMenuItems.tasks.forEach(function (task) {
             let menuItem = `
@@ -610,11 +624,172 @@ function spawnMenuItems (jsonMenuItems = {} ) {
                 `;
                 menuElement.insertAdjacentHTML('beforeEnd', menuItem);
     });
+    // moving menu to starting position
     initializeMenu();
+    // hang window handler on taskbar items
+    forEachClick('.task-list-item', callWindow);
 }
 //
 
+function removeMenuItem ( element = {}, menu = {} ) {
+    let styles = window.getComputedStyle(element),
+        elementFullHeight = element.offsetHeight + parseInt(styles.marginTop),
+        menuBottom = parseInt(menu.style.bottom) + elementFullHeight,
+        menuTransition = menu.style.transition;
+    ;
+    element.style.transition = '0.75s';
+    element.style.height = element.clientHeight + 'px';
+    menu.style.bottom = menuBottom + 'px';
+
+    function animation1(x) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                element.style.overflow = 'hidden';
+                element.style.margin = '0px';
+                element.style.transform = 'scale(0)'; 
+                element.style.height = '0';
+                menu.style.transition = '1.75s';
+                document.getElementById('open-tasks').click();
+                // console.log('a');
+                resolve("animation1!");
+            }, 0);
+        });
+    }
+    function animation2(x) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                menu.style.transition = menuTransition;
+                // console.log('b');
+                resolve("animation2!");
+            }, 750);
+        });
+    }
+    function animation3(x) {
+        return new Promise(resolve => {
+            element.remove();
+            if (! menu.getElementsByTagName('ul')[0].getElementsByTagName('div')[0] ) {
+                console.log('No tasks');
+                let menuStyles = window.getComputedStyle(menu),
+                    menuML = menuStyles.marginLeft;
+                
+            setTimeout(() => {
+                menu.style.marginLeft = menuML;
+            }, 0);
+            setTimeout(() => {
+                menu.style.marginLeft = 0;
+                menu.style.width = 0;
+                menu.style.border = 0;
+                menu.style.padding = 0;
+                menu.style.overflow = 'hidden';
+            }, 10);
+                console.log(menuML);
+            }
+            resolve("animation3!");
+        });
+    }
+
+    async function animateAll() {
+        let result1 = await animation1(),
+            result2 = await animation2(),
+            result3 = await animation3();
+    }
+    animateAll();
+
+}
+
+
+// spawn window on click menu item
+function callWindow ( element ) {
+    let taskName = element.getAttribute('task-name'),
+        taskId = element.getAttribute('task-id'),
+        menuBox = document.getElementById('menu-wrap');
+    let windowData = jsonWindowItemsData.tasks[taskId-1]; // like response
+    
+        removeMenuItem(element, menuBox);
+        
+        spawnHtml( spawnWindow(windowData) );
+        spawnTask(windowData);
+        setTasksMargin();
+        forEachClick('.window-green.unhanged', focusWindow);
+        forEachFunc(".window-head.unhanged", windowsDraging);
+        document.querySelectorAll('.window-green.unhanged')[0].classList.remove('unhanged');
+        // console.log(taskName);
+        // console.log(taskId);
+        // console.log(windowData);
+}
+//
+
+// spawning window
+function spawnWindow ( windowObj = {} ) {
+    let taskId = windowObj.id,
+        taskName = windowObj.name,
+        windowData = windowObj.windowData;
+    let windowHTML = `
+            <div class="window-green unhanged" task-name="${taskName}" task-id="${taskId}" style="z-index: ${currentZindex++};">
+                <div class="window-top">
+                    <div class="window-minimize">
+                        <div class="minimize-1"></div>
+                        <div class="minimize-2"></div>
+                    </div>
+                    <div class="window-close">
+                        <div class="close-line1"></div>
+                        <div class="close-line2"></div>
+                    </div>
+                    <div class="window-line"></div>
+                </div>
+                <div class="window-head unhanged"><div class="wh-header">[ ${taskName} ]</div></div>
+                <div class="window-body">
+                    ${windowData}
+                </div>
+            </div>
+        `;
+    return windowHTML;
+}
+//
+
+
+// spawning task in taskbar
+function spawnTask ( windowObj = {} ) {
+    let taskId = windowObj.id,
+        taskName = windowObj.name,
+        elementHTML = `
+            <div class="taskbar-item" task-name="${taskName}" task-id="${taskId}">
+                <div class="tpi-title">[ ${taskName} ]</div>
+            </div>
+        `;
+    
+        let taskbar = document.getElementById('taskbar');
+    return taskbar.insertAdjacentHTML('beforeend', elementHTML);
+    
+}
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // functions to render page
+
+forEachClick('.window-close', closeWindow);
+
+// hang window focus handler on window
+forEachClick('.window-green', focusWindow);
+//
+
+// hang window focus handler on taskbar item
+forEachClick('.taskbar-item', focusWindowFromTB);
+//
+
 spawnRadar();
 
 spawnMenuItems(jsonMenuItemsData);

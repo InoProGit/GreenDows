@@ -1,9 +1,9 @@
-const windowsResponse = `{
-    tasks : [
+const jsonWindowItemsResponse = `{
+    "tasks" : [
       {
         "id": 1,
         "name": "Task",
-        "windowData": ""
+        "windowData": "3r23r3r3"
       },
       {
         "id": 2,
