@@ -63,94 +63,145 @@
             
         </div>
     </div> -->
-    <div class="window-green active" task-name="Task">
-        <div class="window-top">
-            <div class="window-minimize">
-                <div class="minimize-1"></div>
-                <div class="minimize-2"></div>
-            </div>
-            <div class="window-close">
-                <div class="close-line1"></div>
-                <div class="close-line2"></div>
-            </div>
-            <div class="window-line"></div>
-        </div>
-        <div class="window-head"><div class="wh-header">[ Task ]</div></div>
-        <div class="window-body">
-            <article class="markdown-body entry-content container-lg" itemprop="text"><h1>Дроны</h1>
-                <p>
-                    Мйарп склонился над монитором подключенным к древнему радару.
-                    Он ждал появления свидрушей с минуты на минуту. Дроны были наготове, единственная проблема была в том,
-                    что для поимки свидруша дрону нужны были X/Y координаты сектора относительно базы с координатами 0/0 в декартовой системе координат.
-                    Соответственно координаты квадрата, который располагался на карте  справа от базы были 1/0, снизу 0/-1 и т.д.
-                </p>
-                <p>
-                    Если бы обычный радар не вышел из строя, Мйарп бы так не переживал.
-                    Но древний радар использовал странную систему координат. Каждый квадрат обозначался уникальным числом. База находилась в квадрате 0.
-                    Центр карты на радаре выглядел так:
-                </p>
-                <div class="snippet-clipboard-content position-relative overflow-auto" style="text-align: center;">
-                    <pre>
-                        <code>
-35  15  16  18  20
-34  14  1   4   21
-33  12  0   6   22
-32  10  9   8   24
-30  28  27  26  25
-                        </code>
-                    </pre>
+    <div class="window-green" task-name="Task">
+        <div class="window-main">
+            <div class="window-top">
+                <div class="window-minimize">
+                    <div class="minimize-1"></div>
+                    <div class="minimize-2"></div>
                 </div>
-                <p>
-                    Дело оставалось за малым - перевести координаты, выдаваемые древним радаром, в координаты понятные дрону.
-                    Компьютер понимал любой язык, но Мйарп выбрал свой любимый и набрал
-                    <code>define ancientToModern(n int) (x,y int)</code>. Свидрушы приближались...
-                </p>
-            </article>
-            <br>
-            <form id="matrix-form" action="#">
-                <label for="matrix-size">Ширина радара: <input id="matrix_size" name="matrix_size" type="number" step="2" min="5" value="5" max="11"></label>
+                <div class="window-close">
+                    <div class="close-line1"></div>
+                    <div class="close-line2"></div>
+                </div>
+                <div class="window-line"></div>
+            </div>
+            <div class="window-head"><div class="wh-header">[ Task ]</div></div>
+            <div class="window-body">
+                <div class="window-content">
+
+                <article class="markdown-body entry-content container-lg" itemprop="text"><h1>Дроны</h1>
+                    <p>
+                        Мйарп склонился над монитором подключенным к древнему радару.
+                        Он ждал появления свидрушей с минуты на минуту. Дроны были наготове, единственная проблема была в том,
+                        что для поимки свидруша дрону нужны были X/Y координаты сектора относительно базы с координатами 0/0 в декартовой системе координат.
+                        Соответственно координаты квадрата, который располагался на карте  справа от базы были 1/0, снизу 0/-1 и т.д.
+                    </p>
+                    <p>
+                        Если бы обычный радар не вышел из строя, Мйарп бы так не переживал.
+                        Но древний радар использовал странную систему координат. Каждый квадрат обозначался уникальным числом. База находилась в квадрате 0.
+                        Центр карты на радаре выглядел так:
+                    </p>
+                    <div class="snippet-clipboard-content position-relative overflow-auto" style="text-align: center;">
+                        <pre>
+                            <code>
+    35  15  16  18  20
+    34  14  1   4   21
+    33  12  0   6   22
+    32  10  9   8   24
+    30  28  27  26  25
+                            </code>
+                        </pre>
+                    </div>
+                    <p>
+                        Дело оставалось за малым - перевести координаты, выдаваемые древним радаром, в координаты понятные дрону.
+                        Компьютер понимал любой язык, но Мйарп выбрал свой любимый и набрал
+                        <code>define ancientToModern(n int) (x,y int)</code>. Свидрушы приближались...
+                    </p>
+                </article>
                 <br>
-                <button type="submit">Создать радар</button>
-            </form>
+                <form id="matrix-form" action="#">
+                    <label for="matrix-size">Ширина радара: <input id="matrix_size" name="matrix_size" type="number" step="2" min="5" value="5" max="11"></label>
+                    <br>
+                    <button type="submit">Создать радар</button>
+                </form>
+
+                </div>
+            </div>
+        </div>
+        <div class="window-borders" style="width: 572px; height: 600px;">
+            <div class="window-border-top">
+                <div class="window-border-top-right"></div>
+            </div>
+            <div class="window-border-bottom">
+                <div class="window-border-bottom-left"></div>
+            </div>
+            <div class="window-border-left"></div>
+            <div class="window-border-right"></div>
+            <div class="window-border-top-left"></div>
+            <div class="window-border-bottom-right"></div>
         </div>
     </div>
-    <div class="window-green window-radar" task-name="RADAR">
-        <div class="window-top">
-            <div class="window-minimize">
-                <div class="minimize-1"></div>
-                <div class="minimize-2"></div>
+    <div class="window-green window-radar active" task-name="RADAR">
+        <div class="window-main">
+            <div class="window-top">
+                <div class="window-minimize">
+                    <div class="minimize-1"></div>
+                    <div class="minimize-2"></div>
+                </div>
+                <div class="window-close">
+                    <div class="close-line1"></div>
+                    <div class="close-line2"></div>
+                </div>
+                <div class="window-line"></div>
             </div>
-            <div class="window-close">
-                <div class="close-line1"></div>
-                <div class="close-line2"></div>
+            <div class="window-head"><div class="wh-header">[ RADAR ]</div></div>
+            <div class="window-body">
+                <div class="window-content">
+                    <table>
+                        <tbody id="matrix-graph"></tbody>
+                    </table>
+                </div>
             </div>
-            <div class="window-line"></div>
         </div>
-        <div class="window-head"><div class="wh-header">[ RADAR ]</div></div>
-        <div class="window-body">
-            <table>
-                <tbody id="matrix-graph"></tbody>
-            </table>
+        <div class="window-borders" style="width: 572px; height: 600px;">
+            <div class="window-border-top">
+                <div class="window-border-top-right"></div>
+            </div>
+            <div class="window-border-bottom">
+                <div class="window-border-bottom-left"></div>
+            </div>
+            <div class="window-border-left"></div>
+            <div class="window-border-right"></div>
+            <div class="window-border-top-left"></div>
+            <div class="window-border-bottom-right"></div>
         </div>
     </div>
     
     <div class="window-green window-radar" task-name="Solution">
-        <div class="window-top">
-            <div class="window-minimize">
-                <div class="minimize-1"></div>
-                <div class="minimize-2"></div>
+        <div class="window-main">
+            <div class="window-top">
+                <div class="window-minimize">
+                    <div class="minimize-1"></div>
+                    <div class="minimize-2"></div>
+                </div>
+                <div class="window-close">
+                    <div class="close-line1"></div>
+                    <div class="close-line2"></div>
+                </div>
+                <div class="window-line"></div>
             </div>
-            <div class="window-close">
-                <div class="close-line1"></div>
-                <div class="close-line2"></div>
+            <div class="window-head"><div class="wh-header">[ Solution ]</div></div>
+            <div class="window-body">
+                <div class="window-content">
+                    <pre><code id="code-wrap" class="hljs language-javascript"></code></pre>
+                    <br>
+                    <div class="author">Styled with <a href="https://highlightjs.org/">highlightjs.org</a></div>
+                </div>
             </div>
-            <div class="window-line"></div>
         </div>
-        <div class="window-head"><div class="wh-header">[ Solution ]</div></div>
-        <div class="window-body">
-            <pre><code id="code-wrap" class="hljs language-javascript"></code></pre>
-            <br>
-            <div class="author">Styled with <a href="https://highlightjs.org/">highlightjs.org</a></div>
+        
+        <div class="window-borders" style="width: 572px; height: 600px;">
+            <div class="window-border-top">
+                <div class="window-border-top-right"></div>
+            </div>
+            <div class="window-border-bottom">
+                <div class="window-border-bottom-left"></div>
+            </div>
+            <div class="window-border-left"></div>
+            <div class="window-border-right"></div>
+            <div class="window-border-top-left"></div>
+            <div class="window-border-bottom-right"></div>
         </div>
     </div>
     <div id="taskbar-wrap">
@@ -194,6 +245,7 @@
 
 
         </div>
+        <div id="taskbar-overlay"></div>
     </div>
 
 <script type="text/javascript" src="menuItemsResponse.js"></script> <!-- json response whit menu data-->
@@ -375,26 +427,73 @@ async function animateWindow (element = [] || {}, cssClass = "hide-height", widt
 }
 //
 
+// function blocker clicks on active animation
+function blockClicks ( element = Element, time = Number ) {
+    element.classList.add("blocked");
+    let blockedTimeOut = setTimeout(() => {
+        element.classList.remove("blocked");
+    }, time);
+}
+//
+
 // hang any function onClick by selector
-function forEachClick ( selector = '', func = function(){} ) {
-    [].forEach.call( document.querySelectorAll(selector), function(element) {
+function forEachClick (
+    args = {
+        selector: String,
+        func: Function,
+        needTimeOut: Boolean,
+        secTimeOut: Number,
+        selectorToBlocked: String
+    }
+) {
+    [].forEach.call( document.querySelectorAll(args.selector), function(element) {
         element.onclick = function(event) {
-            func(this)
+            if ( element.classList.contains("blocked") || element.closest(".blocked") === null ) {
+                args.func(this);
+                if ( args.needTimeOut ) {
+                    blockClicks(document.querySelectorAll(args.selectorToBlocked)[0], args.secTimeOut);
+                }
+            }
         }
     });
 }
 //
 
 // hang any function by selector
-function forEachFunc ( selector = '', func = function(){} ) {
+function forEachFunc ( selector = String, func = Function ) {
     document.querySelectorAll(selector).forEach( function(element) {
         func(element);
     });
 }
 //
 
+// array with selectors and functions when click outside it, hanged on document event click
+let outsideElements = [];
+
+function setOutsideClick ( selector = String, parent = String, funCall = Function ) {
+    outsideElements.push({
+        selector: selector,
+        parent: parent,
+        funCall: funCall
+    });
+}
+
+function clickOutside ( outsideElements = Array ) {
+    outsideElements.forEach( function(element) {
+        if ( document.querySelectorAll(element.selector)[0].classList.contains("active") && !event.target.closest(element.parent) ) {
+            element.funCall();
+            console.warn('click outside element in array');
+        }
+    });
+}
+
+document.addEventListener( 'click' , function (event) {
+    clickOutside(outsideElements);
+});
+//
+
 // input element before #taskbar
-function spawnHtml ( elementHTML = '', positionTop = 0, positionLeft = 0 ) {
+function spawnHtml ( elementHTML = String, positionTop = 0, positionLeft = 0 ) {
     let taskbar = document.getElementById('taskbar-wrap');
     taskbar.insertAdjacentHTML('beforebegin', elementHTML);
     ( positionTop !== 0 ) ? elementHTML.style.top = positionTop + 'px' : false;
@@ -403,7 +502,7 @@ function spawnHtml ( elementHTML = '', positionTop = 0, positionLeft = 0 ) {
 //
 
 // closing window on close button
-function closeWindow ( element ) {
+function closeWindow ( element = Element ) {
     element.onclick = async function(event) {
         let windowGreen = event.target.closest(".window-green"),
             windowTop = event.target.closest(".window-top"),
@@ -433,7 +532,7 @@ function closeWindow ( element ) {
 
 // moving window by drug heading
 let currentZindex = 5;
-function windowsDraging ( windowHead ) {
+function windowsDraging ( windowHead = Element ) {
     let currentWindow = windowHead.closest(".window-green");
 
     windowHead.onmousedown = function(e) {
@@ -449,6 +548,8 @@ function windowsDraging ( windowHead ) {
         function moveAt(e) {
             currentWindow.style.left = e.pageX - shiftX + 'px';
             currentWindow.style.top = e.pageY - shiftY + 'px';
+            console.log(e.pageX);
+            console.log(e.pageY);
         }
         document.onmousemove = function(e) {
             moveAt(e);
@@ -477,23 +578,37 @@ forEachFunc(".window-head", windowsDraging);
 //
 
 // main menu opening
-document.getElementById("open-tasks").addEventListener( 'click' , function (event) {
-    if ( document.getElementById("menu-wrap").classList.contains("active") ) {
-        document.getElementById("menu-wrap").classList.remove("active");
+function toggleMainMenu ( event = Event ) {
+    let menuWrap = document.getElementById("menu-wrap");
+    if ( menuWrap.classList.contains("active") ) {
+        menuWrap.classList.remove("active");
+        menuWrap.style.left = '30px';
         document.getElementById("button-toggle").style.top = '0';
     } else {
-        document.getElementById("menu-wrap").classList.add("active");
+        menuWrap.classList.add("active");
+        menuWrap.style.left = '21px';
         document.getElementById("button-toggle").style.top = '-1.7em';
     }
-});
+    // blockClicks( menuWrap, 750);
+};
+// hang menu opening
+forEachClick({
+    selector: "#open-tasks",
+    func: toggleMainMenu,
+    needTimeOut: true,
+    secTimeOut: parseFloat( getComputedStyle(document.documentElement).getPropertyValue('--default-transition') ) * 1000,
+    selectorToBlocked: "#menu-wrap"
+    });
 //
+
 // main menu closing
-document.addEventListener( 'click' , function (event) {
-    if ( document.getElementById("menu-wrap").classList.contains("active") && !event.target.closest("#menu-wrap") ) {
-        document.getElementById("menu-wrap").classList.remove("active");
-        document.getElementById("button-toggle").style.top = '0';
-    }
-});
+function closeMainMenu ( event = Event ) {
+    document.getElementById("menu-wrap").classList.remove("active");
+    document.getElementById("button-toggle").style.top = '0';
+};
+
+setOutsideClick ('#menu-wrap', '#menu-wrap', closeMainMenu);
+
 //
 
 // set margins inside taskbar
@@ -529,12 +644,12 @@ function initializeMenu () {
     let menuWrap = document.getElementById("menu-wrap"),
         menuListHeight = document.getElementById("task-list").clientHeight
     ;
-    menuWrap.style.bottom = `-${menuListHeight + 9}px`;
+    menuWrap.style.bottom = `-${menuListHeight + 3}px`;
 }
 //
 
 // window focus in
-function focusInWindow ( element, borderWidth ) {
+function focusInWindow ( element = Element, borderWidth = Number) {
     element.classList.add("active");
     element.style.zIndex = currentZindex++;
     element.style.top = parseInt(element.style.top) - borderWidth + 'px';
@@ -543,7 +658,7 @@ function focusInWindow ( element, borderWidth ) {
 //
 
 // window focus out
-function focusOutWindow ( activeElement, borderWidth ) {
+function focusOutWindow ( activeElement = Element, borderWidth = Number ) {
 
     activeElement.style.top = parseInt(activeElement.style.top) + borderWidth + 'px';
     activeElement.style.left = parseInt(activeElement.style.left) + borderWidth + 'px';
@@ -552,7 +667,7 @@ function focusOutWindow ( activeElement, borderWidth ) {
 //
 
 // activate task in taskbar
-function activateTaskInTaskbar ( elementAttribute = '' ) {
+function activateTaskInTaskbar ( elementAttribute = String ) {
     let element = document.querySelector(`.taskbar-item[task-name="${elementAttribute}"]`);
     if ( element ) {
         element.classList.add("active");
@@ -563,7 +678,7 @@ function activateTaskInTaskbar ( elementAttribute = '' ) {
 //
 
 // remove class "active" from elemen with 'selector'
-function deactivate ( selector = '' || {} ) {
+function deactivate ( selector = String || Element ) {
 
     if ( typeof selector === "string" ) {
         let activeItem = document.querySelector(selector);
@@ -581,7 +696,7 @@ function deactivate ( selector = '' || {} ) {
 //
 
 // doing focus on window
-function focusWindow ( element ) {
+function focusWindow ( element = Element ) {
     if ( element.classList.contains("active") ) {
         return false;
     }
@@ -598,7 +713,7 @@ function focusWindow ( element ) {
 //
 
 // focusing window from click on taskbar element
-function focusWindowFromTB ( element ) {
+function focusWindowFromTB ( element = Element ) {
     if ( element.classList.contains("active") ) {
         return false;
     }
@@ -611,8 +726,13 @@ const jsonMenuItemsData = JSON.parse(jsonMenuItemsResponse);
 const jsonWindowItemsData = JSON.parse(jsonWindowItemsResponse); // here all results for simple adding new data in file
 //
 
+// jsonWindowItemsData.tasks[0].windowData = `
+//             <div class="taskbar-item" task-name="Taskk" task-id="1" style="margin: 0px 139.5px;">
+//                 <div class="tpi-title">[ Taskk ]</div>
+//             </div>`;
+
 // creating menu items from "service" response
-function spawnMenuItems ( jsonMenuItems = {} ) {
+function spawnMenuItems ( jsonMenuItems = Object ) {
     let menuElement = document.getElementById("task-list");
     jsonMenuItems.tasks.forEach(function (task) {
             let menuItem = `
@@ -627,11 +747,12 @@ function spawnMenuItems ( jsonMenuItems = {} ) {
     // moving menu to starting position
     initializeMenu();
     // hang window handler on taskbar items
-    forEachClick('.task-list-item', callWindow);
+    
+forEachClick( {selector: ".task-list-item",func: callWindow} );
 }
 //
 
-function removeMenuItem ( element = {}, menu = {} ) {
+function removeMenuItem ( element = Element, menu = Element ) {
     let styles = window.getComputedStyle(element),
         elementFullHeight = element.offsetHeight + parseInt(styles.marginTop),
         menuBottom = parseInt(menu.style.bottom) + elementFullHeight,
@@ -648,7 +769,7 @@ function removeMenuItem ( element = {}, menu = {} ) {
                 element.style.margin = '0px';
                 element.style.transform = 'scale(0)'; 
                 element.style.height = '0';
-                menu.style.transition = '1.75s';
+                menu.style.transition = '1.35s';
                 document.getElementById('open-tasks').click();
                 // console.log('a');
                 resolve("animation1!");
@@ -681,6 +802,9 @@ function removeMenuItem ( element = {}, menu = {} ) {
                 menu.style.border = 0;
                 menu.style.padding = 0;
                 menu.style.overflow = 'hidden';
+
+                document.getElementById("taskbar").style.right = (window.innerWidth - document.getElementById('taskbar').offsetWidth) / 2 + 'px';
+                document.getElementById("taskbar").style.transition = '1s';
             }, 10);
                 console.log(menuML);
             }
@@ -699,20 +823,49 @@ function removeMenuItem ( element = {}, menu = {} ) {
 
 
 // spawn window on click menu item
-function callWindow ( element ) {
+function callWindow ( element = Element ) {
     let taskName = element.getAttribute('task-name'),
         taskId = element.getAttribute('task-id'),
-        menuBox = document.getElementById('menu-wrap');
-    let windowData = jsonWindowItemsData.tasks[taskId-1]; // like response
+        menuBox = document.getElementById('menu-wrap'),
+        windowData = jsonWindowItemsData.tasks[taskId-1], // like response
+        transition = getComputedStyle(document.documentElement).getPropertyValue('--fast-transition')    
+    ;
     
         removeMenuItem(element, menuBox);
         
         spawnHtml( spawnWindow(windowData) );
-        spawnTask(windowData);
-        setTasksMargin();
-        forEachClick('.window-green.unhanged', focusWindow);
+        let newWindow = spawnTask(windowData);
+        
+        setWindowOnCenter(newWindow);
+
+        document.querySelector(".window-green.active").classList.remove("active");
+        newWindow.classList.add("active");
+        
+            
+        forEachClick( {selector: ".window-green.unhanged",func: focusWindow} );
+        forEachClick( {selector: ".window-close.unhanged",func: closeWindow} );
         forEachFunc(".window-head.unhanged", windowsDraging);
-        document.querySelectorAll('.window-green.unhanged')[0].classList.remove('unhanged');
+
+        newWindow.classList.remove('unhanged');
+        document.querySelectorAll(".window-head.unhanged")[0].classList.remove('unhanged');
+            newWindow.getElementsByClassName("window-borders")[0].style.width = newWindow.offsetWidth + 'px';
+            newWindow.getElementsByClassName("window-borders")[0].style.height = newWindow.offsetHeight + 'px';
+
+        setTimeout(() => {
+            newWindow.style.transition = transition;
+            newWindow.style.webkitTransform = 'scale(1)';
+            newWindow.style.mozTransform = 'scale(1)';
+            newWindow.style.msTransform = 'scale(1)';
+            newWindow.style.oTransform = 'scale(1)';
+            newWindow.style.transform = 'scale(1)';
+        }, 1);
+
+        setTimeout(() => {
+            newWindow.style.transition = 'unset';
+        }, parseFloat(transition) * 1000 + 1 );
+
+        
+        setTasksMargin();
         // console.log(taskName);
         // console.log(taskId);
         // console.log(windowData);
@@ -720,26 +873,50 @@ function callWindow ( element ) {
 //
 
 // spawning window
-function spawnWindow ( windowObj = {} ) {
+function spawnWindow ( windowObj = Object ) {
     let taskId = windowObj.id,
         taskName = windowObj.name,
+        windowSizeClass = windowObj.windowSizeClass,
         windowData = windowObj.windowData;
     let windowHTML = `
-            <div class="window-green unhanged" task-name="${taskName}" task-id="${taskId}" style="z-index: ${currentZindex++};">
-                <div class="window-top">
-                    <div class="window-minimize">
-                        <div class="minimize-1"></div>
-                        <div class="minimize-2"></div>
+            <div class="window-green unhanged" task-name="${taskName}" task-id="${taskId}"
+                style="z-index: ${currentZindex++};
+                left: 50%;
+                top: 50%;
+                -webkit-transform: translate(-50%, -50%);
+                -moz-transform: translate(-50%, -50%);
+                -ms-transform: translate(-50%, -50%);
+                -o-transform: translate(-50%, -50%);
+                transform: translate(-50%, -50%);
+            ">
+                <div class="window-main">
+                    <div class="window-top">
+                        <div class="window-minimize">
+                            <div class="minimize-1"></div>
+                            <div class="minimize-2"></div>
+                        </div>
+                        <div class="window-close unhanged">
+                            <div class="close-line1"></div>
+                            <div class="close-line2"></div>
+                        </div>
+                        <div class="window-line"></div>
                     </div>
-                    <div class="window-close">
-                        <div class="close-line1"></div>
-                        <div class="close-line2"></div>
+                    <div class="window-head unhanged"><div class="wh-header">[ ${taskName} ]</div></div>
+                    <div class="window-body ${windowSizeClass}">
+                        ${windowData}
                     </div>
-                    <div class="window-line"></div>
                 </div>
-                <div class="window-head unhanged"><div class="wh-header">[ ${taskName} ]</div></div>
-                <div class="window-body">
-                    ${windowData}
+                <div class="window-borders">
+                    <div class="window-border-top">
+                        <div class="window-border-top-right"></div>
+                    </div>
+                    <div class="window-border-bottom">
+                        <div class="window-border-bottom-left"></div>
+                    </div>
+                    <div class="window-border-left"></div>
+                    <div class="window-border-right"></div>
+                    <div class="window-border-top-left"></div>
+                    <div class="window-border-bottom-right"></div>
                 </div>
             </div>
         `;
@@ -749,7 +926,7 @@ function spawnWindow ( windowObj = {} ) {
 
 
 // spawning task in taskbar
-function spawnTask ( windowObj = {} ) {
+function spawnTask ( windowObj = Object ) {
     let taskId = windowObj.id,
         taskName = windowObj.name,
         elementHTML = `
@@ -758,15 +935,44 @@ function spawnTask ( windowObj = {} ) {
             </div>
         `;
     
-        let taskbar = document.getElementById('taskbar');
-    return taskbar.insertAdjacentHTML('beforeend', elementHTML);
+        document.getElementById('taskbar').insertAdjacentHTML('beforeend', elementHTML);
+
+    return document.querySelectorAll(".window-green.unhanged")[0];
     
 }
 //
 
+// set window on center
+function setWindowOnCenter( element = Element ) {
+    console.log( document.getElementById("taskbar-overlay").offsetHeight );
+    console.log( element.getBoundingClientRect() );
+    let elementPositions = element.getBoundingClientRect(),
+        taskBarHeight = document.getElementById("taskbar-overlay").offsetHeight,
+        borderWidthSingle = parseFloat( getComputedStyle(document.documentElement).getPropertyValue('--border-width') ) / 2
+    ;
+    element.style.top = 
+        ( elementPositions.top < borderWidthSingle + taskBarHeight ) ?
+            borderWidthSingle + 'px'
+                :
+            elementPositions.top - taskBarHeight + 'px'
+    ;
+    element.style.left = 
+        ( window.innerWidth - element.offsetWidth > elementPositions.left ) ?
+            elementPositions.left + 'px'
+                :
+            borderWidthSingle + 'px' 
+    ;
+
+    element.style.webkitTransform = 'scale(0)';
+    element.style.mozTransform = 'scale(0)';
+    element.style.msTransform = 'scale(0)';
+    element.style.oTransform = 'scale(0)';
+    element.style.transform = 'scale(0)';
+    
 
 
-
+}
+//
 
 
 
@@ -779,18 +985,17 @@ function spawnTask ( windowObj = {} ) {
 
 
 // functions to render page
-
-forEachClick('.window-close', closeWindow);
+forEachClick( {selector: ".window-close",func: closeWindow} );
 
 // hang window focus handler on window
-forEachClick('.window-green', focusWindow);
+forEachClick( {selector: ".window-green",func: focusWindow} );
 //
 
 // hang window focus handler on taskbar item
-forEachClick('.taskbar-item', focusWindowFromTB);
+forEachClick( {selector: ".taskbar-item",func: focusWindowFromTB} );
 //
 
-spawnRadar();
+spawnRadar(radarToDecard(spawnRadarVals(5)));
 
 spawnMenuItems(jsonMenuItemsData);
 

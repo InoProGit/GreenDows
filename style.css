@@ -1,9 +1,30 @@
 /*
 colors:
-green - #33ff33
-darkGreen - #339900 || #43f046
+green - var(--default-light-color)
+darkGreen - #339900 || #43f046 008000
 darkGray - #272727
 */
+
+:root {
+    --default-background: rgba(0, 0, 0);
+    --border-dark-color: rgb(0,69,0);
+    --border-light-color: rgb(0,110,0);
+    --default-dark-color: rgb(0,128,0);
+    --default-light-color: rgb(0,255,0);
+
+    --default-transition: 0.75s;
+    --long-transition: 1s;
+    --fast-transition: 0.25s;
+    
+    --border-width: 10px;
+    --border-diagonal: 14px;
+    --top-right-corner-top: -7px;
+    --corners-margin: 2.5px;
+    --cursor-horizontal-resize: n-resize;
+    --cursor-vertical-resize: e-resize;
+    --cursor-xy-resize: nwse-resize;
+}
+
 
 * {
     padding: 0;
@@ -35,14 +56,14 @@ darkGray - #272727
     margin: 0 !important;
 }
 .hide-background {
-    background: #33ff33 !important;
+    background: var(--default-light-color) !important;
 }
 
 
 
 html {
     background: black;
-    color: #33ff33;
+    color: var(--default-light-color);
     overflow: hidden;
 }
 
@@ -53,7 +74,7 @@ html {
 }
 
 /* Track */
-::-webkit-scrollbar-track  {
+::-webkit-scrollbar-track {
     border-radius: 10px;
     background: rgb(0,59,0);
     margin: 15px;
@@ -62,17 +83,20 @@ html {
 /* Handle */
 ::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background: #33ff33;
+    background: var(--default-light-color);
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: #339900;
+    background: var(--default-dark-color);
 }
 
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
 
 a {
-    color: #33ff33;
+    color: var(--default-light-color);
 }
 table {
     border-spacing: 0px;
@@ -84,19 +108,19 @@ td {
     /* border: 1px solid black; */
     text-align: center;
     cursor: pointer;
-    border: 1px solid #272727;
+    border: 1px solid var(--default-background);
     width: 4em;
     height: 4em;
 }
 
 tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
-    background-color: #339900;
-    color: #000;
+    background-color: var(--default-dark-color);
+    color: var(--default-light-color);
 }
 
 .base {
     background: rgb(0,59,0) !important;
-    color: #33ff33 !important;
+    color: var(--default-light-color) !important;
 }
 
 .clicked {
@@ -105,11 +129,118 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     background-color: cornflowerblue !important;
 }
 
+.window-main {
+    position: relative;
+    background: black;
+    margin: var(--border-width);
+    z-index: 1;
+    transition: var(--fast-transition);
+}
+
+.window-borders {
+    position: absolute;
+    top: 0;
+    transition: var(--fast-transition);
+}
+
+.window-border-top, .window-border-bottom, .window-border-left, .window-border-right, .window-border-bottom-left {
+    position: absolute;
+    transition: var(--fast-transition);
+}
+
+.window-border-top {
+    background: var(--border-dark-color);
+    top: 0;
+    width: 100%;
+    height: var(--border-width);
+    overflow: hidden;
+    cursor: var(--cursor-horizontal-resize);
+}
+
+.window-border-bottom {
+    background: var(--border-light-color);
+    bottom: 0;
+    width: 100%;
+    height: var(--border-width);
+    overflow: hidden;
+    cursor: var(--cursor-horizontal-resize);
+}
+
+.window-border-right {
+    background: var(--border-light-color);
+    right: 0;
+    width: var(--border-width);
+    height: 100%;
+    cursor: var(--cursor-vertical-resize);
+}
+
+.window-border-left {
+    background: var(--border-dark-color);
+    left: 0;
+    width: var(--border-width);
+    height: 100%;
+    cursor: var(--cursor-vertical-resize);
+}
+
+
+.window-border-top-right {
+    width: var(--border-diagonal);
+    height: var(--border-diagonal);
+    margin-left: auto;
+    z-index: 1;
+    background: var(--border-dark-color);
+    position: relative;
+    transform: rotate(45deg);
+    top: var(--top-right-corner-top);
+    margin-right: var(--corners-margin);
+    cursor: var(--cursor-horizontal-resize);
+    transition: var(--fast-transition);
+}
+
+
+.window-border-bottom-left {
+    width: var(--border-diagonal);
+    height: var(--border-diagonal);
+    z-index: 1;
+    background: var(--border-light-color);
+    position: relative;
+    transform: rotate(45deg);
+    margin: var(--corners-margin);
+    cursor: var(--cursor-horizontal-resize);
+    transition: var(--fast-transition);
+}
+
+.window-green.active .window-border-top, .window-green.active .window-border-left, .window-green.active .window-border-top-right {
+    background: var(--default-dark-color);
+}
+
+.window-green.active .window-border-right, .window-green.active .window-border-bottom, .window-green.active .window-border-bottom-left {
+    background: var(--default-light-color);
+}
+
+.window-border-top-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--border-width);
+    height: var(--border-width);
+    cursor: var(--cursor-xy-resize);
+}
+
+.window-border-bottom-right {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: var(--border-width);
+    height: var(--border-width);
+    cursor: var(--cursor-xy-resize);
+}
+
 .window-green {
-    border: 1px solid #33ff33;
+    /* border: 1px solid var(--default-light-color); */
     position: absolute;
     background: black;
-    max-width: 500px;
+    /* max-width: 500px; */
     z-index: 1;
     top: 5px;
     left: 5px;
@@ -117,7 +248,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 .window-green.active {
     z-index: 5;
-    border: 10px inset #33ff33;
+    /* border: 10px inset var(--default-light-color); */
 }
 
 .window-radar {
@@ -127,7 +258,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 .window-top {
     display: flex;
-    background: #33ff33;
+    background: var(--default-light-color);
     color: black;
     padding: 5px;
 }
@@ -144,7 +275,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     width: 0.7em;
     height: 0.7em;
     border: 1px solid black;
-    background: #33ff33;
+    background: var(--default-light-color);
     cursor: pointer;
 }
 
@@ -182,8 +313,8 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 .window-line {
     width: 100%;
     height: 1em;
-    /* border: 1px solid #339900; */
-    background: #339900;
+    /* border: 1px solid var(--default-dark-color); */
+    background: var(--default-dark-color);
 }
 
 .window-head {
@@ -197,7 +328,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 .wh-header {
     margin: 0 auto;
-    background: #33ff33;
+    background: var(--default-light-color);
     padding: 0 5px;
     font-weight: 700;
     color: black;
@@ -210,19 +341,49 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 }
 
 .window-body {
-    margin: 1em;
+    margin: 8px;
+    padding: 18px;
     overflow: overlay;
+    width: 500px;
+    height: 500px;
+    display: flex;
+    align-items: center;
+}
+
+.window-content {
+    margin: auto;
+}
+
+.body-small {
+    width: 250px;
+    height: 250px;
+}
+
+.body-medium {
+    width: 500px;
+    height: 500px;
+}
+
+.body-large {
+    width: 1000px;
+    height: 750px;
 }
 
 #taskbar-wrap {
-    position: absolute;
-    height: 3em;
-    width: 100%;
-    bottom: 0px;
-    z-index: 9999999999999;
-    padding: 5px;
-    display: flex;
-    align-items: flex-end;
+    /* position: absolute; */
+    /* height: 3em; */
+    /* width: 100%; */
+    /* bottom: 0px; */
+    /* z-index: 9999999999999; */
+    /* padding: 5px; */
+    /* display: flex; */
+    /* align-items: flex-end; */
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none;    
 }
 
 
@@ -235,10 +396,12 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     margin-bottom: -4px;
     margin-left: auto;
     border-radius: 10px 10px 0px 0px;
-    position: relative;
+    position: absolute;
+    left: 30px;
     /* bottom: -323px; */
-    transition: 0.8s;
+    transition: var(--default-transition);
     width: 15%;
+    z-index: 999;
 }
 
 #task-list {
@@ -267,7 +430,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 #open-tasks {
     border: 2px solid;
-    padding: 4px;
+    padding: 9px;
     font-size: 2em;
     text-align: center;
     border-radius: 10px;
@@ -278,12 +441,6 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     align-items: center;
     position: relative;
     overflow: hidden;
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none;   /* Chrome/Safari/Opera */
-    -khtml-user-select: none;    /* Konqueror */
-    -moz-user-select: none;      /* Firefox */
-    -ms-user-select: none;       /* Internet Explorer/Edge */
-    user-select: none;    
 }
 
 #menu-wrap.active {
@@ -311,7 +468,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 #button-toggle {
     margin-left: auto;
     margin-right: 0.5em;
-    transition: 1s;
+    transition: var(--long-transition);
     top: -1.7em;
     top: 0;
     position: relative;
@@ -337,7 +494,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     text-align: center;
     font-size: 1.5em;
     text-decoration: underline;
-    transition: 1s;
+    transition: var(--long-transition);
     opacity: 1;
     opacity: 0;
 }
@@ -346,17 +503,27 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 #taskbar {
     margin: auto;
     width: 80%;
-    height: 100%;
-    background: black;
+    height: 58px;
+    background: var(--default-background);
     border: 2px solid;
     border-radius: 10px;
-    margin-top: -3px;
-    position: relative;
+    /* margin-top: -3px; */
+    position: absolute;
+    right: 30px;
     display: flex;
     overflow-y: hidden;
     align-items: center;
+    bottom: 5px;
+    z-index: 999;
 }
 
+#taskbar-overlay {
+    position: absolute;
+    bottom: 0px;
+    height: 68px;
+    background: transparent;
+    width: 100%;
+}
 
 
 
@@ -387,7 +554,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 .taskbar-item {
     border-radius: 10px;
     margin: 0;
-    transition: 0.75s;
+    transition: var(--default-transition);
     margin: 0 15px;
     z-index: 1;
 }
@@ -401,6 +568,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     background: black;
     cursor: pointer;
     font-weight: 500;
+    transition: var(--fast-transition);
 }
 
 .taskbar-item.active .tpi-title {
