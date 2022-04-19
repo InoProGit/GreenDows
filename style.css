@@ -17,6 +17,7 @@ darkGray - #272727
     --fast-transition: 0.25s;
     
     --border-width: 10px;
+    --border-angele-resize: 30px;
     --border-diagonal: 14px;
     --top-right-corner-top: -7px;
     --corners-margin: 2.5px;
@@ -222,8 +223,8 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     position: absolute;
     top: 0;
     left: 0;
-    width: var(--border-width);
-    height: var(--border-width);
+    width: var(--border-angele-resize);
+    height: var(--border-angele-resize);
     cursor: var(--cursor-xy-resize);
 }
 
@@ -231,8 +232,8 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: var(--border-width);
-    height: var(--border-width);
+    width: var(--border-angele-resize);
+    height: var(--border-angele-resize);
     cursor: var(--cursor-xy-resize);
 }
 
@@ -484,7 +485,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     height: 60%;
     min-width: 400px;
     max-width: 600px;
-    overflow: auto;
+    white-space: nowrap;
     margin: auto;
     position: absolute;
     top: 0;
@@ -496,7 +497,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     text-decoration: underline;
     transition: var(--long-transition);
     opacity: 1;
-    opacity: 0;
+    /* opacity: 0; */
 }
 
 
@@ -510,11 +511,20 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     /* margin-top: -3px; */
     position: absolute;
     right: 30px;
-    display: flex;
+    /* display: flex; */
     overflow-y: hidden;
     align-items: center;
     bottom: 5px;
     z-index: 999;
+}
+
+#taskbar-inner {
+    position: relative;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    width: auto;
+    left: 0;
 }
 
 #taskbar-overlay {
@@ -552,10 +562,12 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 
 .taskbar-item {
+    position: absolute;
+    left: 0;
     border-radius: 10px;
     margin: 0;
     transition: var(--default-transition);
-    margin: 0 15px;
+    /* margin: 0 15px; */
     z-index: 1;
 }
 
@@ -579,7 +591,9 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     background: seagreen;
 }
 
-
+.mg0imp {
+    margin: 0 !important;
+}
 
 
 
