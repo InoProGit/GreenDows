@@ -24,8 +24,11 @@ darkGray - #272727
     --cursor-horizontal-resize: n-resize;
     --cursor-vertical-resize: e-resize;
     --cursor-xy-resize: nwse-resize;
+    
+    --ghost-window-margin: 10px;
 }
 
+.window-borders .outside {cursor: default;}
 
 * {
     padding: 0;
@@ -535,7 +538,15 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     width: 100%;
 }
 
-
+#ghost-window {
+    position: absolute;
+    border: 2px solid rgb(0,255,0);
+    border-radius: 10px;
+    box-shadow: 0px 0px 46px 28px var(--border-dark-color);
+    background: green;opacity: 0.35;
+    transition: var(--default-transition);
+    /* transform: scale(0); */
+}
 
 
 

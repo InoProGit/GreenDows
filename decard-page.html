@@ -8,7 +8,7 @@
     <title>Decard Autumn</title>
 </head>
 <body>
-    <div id="triger">Click here</div>
+    <!-- <div id="triger">Click here</div> -->
     <div id="taskbar-wrap">
         <div id="menu-wrap">
             <div id="open-tasks">
@@ -523,41 +523,139 @@ function maximizeWindow ( element = undefined ) {
 }
 //
 
-// moving window by drug heading
+// showing ghost window for maximizing
 let currentZindex = 5;
+function showGhostWindow( greenWindow = {} , width, height ) {
+    let ghostMargin = parseInt( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') ),
+        ghostWindow = `<div id="ghost-window"
+                            style="z-index: ${currentZindex - 2};
+                            width: 0;
+                            height: 0;
+                            left: ${event.pageX}px;
+                            margin: 10px;
+                        "
+                        mouse-position="${event.pageX}"
+                        ></div>`
+    ;
+    if (!document.querySelector("#ghost-window")) document.querySelector("body").insertAdjacentHTML('beforeEnd', ghostWindow);
+
+    let ghostWindowElement = document.querySelector("#ghost-window");
+    
+    console.log(width - ghostMargin*2 +'px');
+    setTimeout(() => {
+        ghostWindowElement.style.left = '0';
+        ghostWindowElement.style.width = width - ghostMargin*2 +'px';
+        ghostWindowElement.style.height = height - ghostMargin*2 +'px';
+    }, 5);
+    
+}
+//
+
+// remove ghost window for mouseup
+function removeGhostWindow( selector = "#ghost-window" ) {
+    if (document.querySelector(selector)) {
+        let ghost = document.querySelector("#ghost-window"),
+        transition = getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'),
+        timeout = parseFloat(transition) * 1000 + 1;
+        ghost.style.transition = transition;
+        ghost.style.width = 0;
+        ghost.style.height = 0;
+        ghost.style.opacity = 0;
+        console.log(getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'));
+        console.log(timeout);
+        ghost.style.left = ghost.getAttribute('mouse-position') + 'px';
+        
+        setTimeout(() => {
+            if (document.querySelector(selector)) document.querySelector("#ghost-window").remove();
+        }, timeout);
+    }
+}
+//
+
+// moving window by drug heading
 function windowsDraging ( windowHead = {} ) {
     let currentWindow = windowHead.closest(".window-green");
+
+    // console.log(windowHead);
+    // windowHead.addEventListener('touchstart', function(event) {
+
+    //     console.log(123);
+    // })
+
 
     windowHead.onmousedown = function(e) {
         focusWindow(e.target.closest(".window-green"));
         let coords = getCoords(currentWindow),
             shiftX = e.pageX - coords.left,
-            shiftY = e.pageY - coords.top
+            shiftY = e.pageY - coords.top,
+            windowWidth = window.innerWidth,
+            windowHeight = window.innerHeight,
+            usableHeight = windowHeight - document.querySelector("#taskbar-overlay").offsetHeight,
+            needModal = false
         ;
         currentWindow.style.position = 'absolute';
         moveAt(e);
         currentWindow.style.zIndex = currentZindex++; // z-index priority
+        document.querySelector("html").style.userSelect = 'none'; 
         
         function moveAt(e) {
             currentWindow.style.left = e.pageX - shiftX + 'px';
             currentWindow.style.top = e.pageY - shiftY + 'px';
-            // console.log(e.pageX);
-            // console.log(e.pageY);
         }
+        removeGhostWindow();
+
         document.onmousemove = function(e) {
             moveAt(e);
+            // console.log(e.pageY);
+            // showGhostWindow();
+
+            
+            if ( parseInt(currentWindow.style.top) <= 0 ){
+                console.log(e.pageY);
+                showGhostWindow(currentWindow, windowWidth, usableHeight);
+            } else if ( document.querySelector("#ghost-window") && parseInt(currentWindow.style.top) > 0 ) {
+                if (document.querySelector("#ghost-window")) removeGhostWindow();
+            }
+            
+            if ( e.pageY < 0 ){
+                windowHead.onmouseup();
+                currentWindow.style.top = '0px';
+                document.querySelector("html").style.userSelect = ''; 
+                needModal = true;
+            } else if ( e.pageY > usableHeight ){
+                console.log(e.pageY);
+                console.log(usableHeight);
+                console.log('down');
+            }
+            
+            // if ( e.pageXOffset < 0 ){
+            //     console.log('up');
+            // } else if ( e.pageX > usableHeight ){
+            //     console.log('down');
+            // }
+
+            // console.log(e.pageX);
         };
         windowHead.onmouseup = function() {
+            if (document.querySelector("#ghost-window")) removeGhostWindow();
+            
             document.onmousemove = null;
             currentWindow.onmouseup = null;
+            document.querySelector("html").style.userSelect = '';
+            if (parseInt(currentWindow.style.top) <= 0) currentWindow.style.top = '0px';
+
+            setTimeout(() => {
+                if ( needModal && !window.screenTop && !window.screenY && confirm(`When u move mouse outside the page, it lose focus.
+    Switch page to fullscreen mode?`) ) document.documentElement.requestFullscreen();
+                needModal = false;
+            }, 10);
         };
 
     }
 
     windowHead.ondragstart = function() {
-        return false;
+        console.log(1);
     };
-
     function getCoords(elem) {
         let box = elem.getBoundingClientRect();
         return {
@@ -569,10 +667,10 @@ function windowsDraging ( windowHead = {} ) {
 //
 
 // hadler for all borders to resize
-function windowResize ( window = {} ) {
+function windowResize ( greenWindow = {} ) {
     const borders = [
         {
-            element: window.querySelector('.window-border-top'),
+            element: greenWindow.querySelector('.window-border-top'),
             borderX: false,
             borderY: true,
             moveX: false,
@@ -580,7 +678,7 @@ function windowResize ( window = {} ) {
             isPositive: true
         },
         {
-            element: window.querySelector('.window-border-right'),
+            element: greenWindow.querySelector('.window-border-right'),
             borderX: true,
             borderY: false,
             moveX: false,
@@ -588,7 +686,7 @@ function windowResize ( window = {} ) {
             isPositive: false
         },
         {
-            element: window.querySelector('.window-border-bottom'),
+            element: greenWindow.querySelector('.window-border-bottom'),
             borderX: false,
             borderY: true,
             moveX: false,
@@ -596,7 +694,7 @@ function windowResize ( window = {} ) {
             isPositive: false
         },
         {
-            element: window.querySelector('.window-border-left'),
+            element: greenWindow.querySelector('.window-border-left'),
             borderX: true,
             borderY: false,
             moveX: true,
@@ -604,7 +702,7 @@ function windowResize ( window = {} ) {
             isPositive: true
         },
         {
-            element: window.querySelector('.window-border-top-left'),
+            element: greenWindow.querySelector('.window-border-top-left'),
             borderX: true,
             borderY: true,
             moveX: true,
@@ -612,7 +710,7 @@ function windowResize ( window = {} ) {
             isPositive: true
         },
         {
-            element: window.querySelector('.window-border-bottom-right'),
+            element: greenWindow.querySelector('.window-border-bottom-right'),
             borderX: true,
             borderY: true,
             moveX: false,
@@ -625,16 +723,20 @@ function windowResize ( window = {} ) {
         item.element.onmousedown = function(event) {
             let clickPosLeft = event.x,
                 clickPosTop = event.y,
-                windowWidth = window.offsetWidth,
-                windowHeight = window.offsetHeight,
-                bordersElement = window.querySelector('.window-borders'),
-                windowBodyElement = window.querySelector('.window-body'),
-                coords = getCoords(window),
+                windowWidth = greenWindow.offsetWidth,
+                windowHeight = greenWindow.offsetHeight,
+                bordersElement = greenWindow.querySelector('.window-borders'),
+                windowBodyElement = greenWindow.querySelector('.window-body'),
+                coords = getCoords(greenWindow),
                 shiftX = event.pageX - coords.left,
                 shiftY = event.pageY - coords.top,
                 windowBodyHeight = windowBodyElement.clientHeight - 2*parseInt(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
-                windowBodyWidth = windowBodyElement.offsetWidth - 2*parseInt(getComputedStyle(windowBodyElement).getPropertyValue('padding'))
+                windowBodyWidth = windowBodyElement.offsetWidth - 2*parseInt(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
+                needModal = false
             ;
+
+            
+            document.querySelector("html").style.userSelect = 'none'; 
 
             function getCoords(elem) {
                 let box = elem.getBoundingClientRect();
@@ -645,49 +747,75 @@ function windowResize ( window = {} ) {
             }
 
             function moveAt( event, moveX, moveY ) {
-                if (moveX) window.style.left = event.pageX - shiftX + 'px';
-                if (moveY) window.style.top = event.pageY - shiftY + 'px';
+                if (moveX) greenWindow.style.left = event.pageX - shiftX + 'px';
+                if (moveY) greenWindow.style.top = event.pageY - shiftY + 'px';
             }
 
             function changeSize( event, borderX, borderY, isPositive ) {
                 let diffX = clickPosLeft - event.pageX,
                     diffY = clickPosTop - event.pageY;
                 bordersElement.style.transition = '0s';
+                windowBodyElement.style.transition = '0s';
+                
+                
+                // console.log(shiftY);
                 
                 if ( borderX && isPositive ) {
-                    window.style.width = windowWidth + diffX + 'px';
+                    greenWindow.style.width = windowWidth + diffX + 'px';
                     bordersElement.style.width = windowWidth + diffX + 'px';
                     windowBodyElement.style.width = windowBodyWidth + diffX + 'px';
                 } else if ( borderX && !isPositive ) {
-                    window.style.width = windowWidth - diffX + 'px';
+                    greenWindow.style.width = windowWidth - diffX + 'px';
                     bordersElement.style.width = windowWidth - diffX + 'px';
                     windowBodyElement.style.width = windowBodyWidth - diffX + 'px';
                 }
                 
                 if ( borderY && isPositive ) {
-                    window.style.height = windowHeight + diffY + 'px';
+                    greenWindow.style.height = windowHeight + diffY + 'px';
                     bordersElement.style.height = windowHeight + diffY + 'px';
                     windowBodyElement.style.height = windowBodyHeight + diffY + 'px';
                 } else if ( borderY && !isPositive ) {
-                    window.style.height = windowHeight - diffY + 'px';
+                    greenWindow.style.height = windowHeight - diffY + 'px';
                     bordersElement.style.height = windowHeight - diffY + 'px';
                     windowBodyElement.style.height = windowBodyHeight - diffY + 'px';
                 }
+                
             }
 
             focusWindow(event.target.closest(".window-green"));
-            changeSize(event, item.borderX, item.borderY, item.isPositive);
-            window.style.zIndex = currentZindex++; // z-index priority
+            // changeSize(event, item.borderX, item.borderY, item.isPositive);
+            greenWindow.style.zIndex = currentZindex++; // z-index priority
 
             document.onmousemove = function(event) {
-                changeSize(event, item.borderX, item.borderY, item.isPositive);
-                moveAt(event, item.moveX, item.moveY);
+                if ( event.pageY <= 0 ) {
+                    let windowTopMinus = parseInt(greenWindow.style.top);
+
+                    greenWindow.style.height = parseInt(greenWindow.style.height) + windowTopMinus + 'px';
+                    bordersElement.style.height = parseInt(bordersElement.style.height) + windowTopMinus + 'px';
+                    windowBodyElement.style.height = parseInt(windowBodyElement.style.height) + windowTopMinus + 'px';
+
+                    greenWindow.onmouseup();
+                    greenWindow.style.top = '0px';
+                    document.querySelector("html").style.userSelect = '';
+                    needModal = true;
+                } else {
+                    changeSize(event, item.borderX, item.borderY, item.isPositive);
+                    moveAt(event, item.moveX, item.moveY);
+                }
             };
 
-            window.onmouseup = function() {
+            greenWindow.onmouseup = function() {
                 document.onmousemove = null;
-                window.onmouseup = null;
-                bordersElement.style.transition = '';
+                greenWindow.onmouseup = null;
+                console.log(greenWindow.style.top);
+                if ( parseInt(greenWindow.style.top) < 0 ) greenWindow.style.top = '0px';
+                setTimeout(() => {
+                    bordersElement.style.transition = '';
+                    windowBodyElement.style.transition = '';
+                    if ( needModal && !window.screenTop && !window.screenY && confirm(`When u move mouse outside the page, it lose focus.
+    Switch page to fullscreen mode?`) ) document.documentElement.requestFullscreen();
+                    needModal = false;
+                }, 10);
             };
 
         }
@@ -1116,11 +1244,11 @@ spawnMenuItems(jsonMenuItemsData);
 
 setTimeout(() => {
     document.querySelectorAll(".task-list-item")[1].click();
-}, 5);
+}, 15);
 
-setTimeout(() => {
-    document.querySelectorAll(".task-list-item")[0].click();
-}, 800);
+// setTimeout(() => {
+//     document.querySelectorAll(".task-list-item")[0].click();
+// }, 820);
 
 
 </script>
