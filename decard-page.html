@@ -525,9 +525,10 @@ function maximizeWindow ( element = undefined ) {
 
 // showing ghost window for maximizing
 let currentZindex = 5;
-function showGhostWindow( greenWindow = {} , width, height ) {
+function showGhostWindow( greenWindow = {} , width = 250, height = 250, id = 0 ) {
     let ghostMargin = parseInt( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') ),
-        ghostWindow = `<div id="ghost-window"
+        selector = 'ghost-window-' + id,
+        ghostWindow = `<div id="${selector}" class="ghost-window"
                             style="z-index: ${currentZindex - 2};
                             width: 0;
                             height: 0;
@@ -537,9 +538,9 @@ function showGhostWindow( greenWindow = {} , width, height ) {
                         mouse-position="${event.pageX}"
                         ></div>`
     ;
-    if (!document.querySelector("#ghost-window")) document.querySelector("body").insertAdjacentHTML('beforeEnd', ghostWindow);
+    if (!document.querySelector(selector)) document.querySelector("body").insertAdjacentHTML('beforeEnd', ghostWindow);
 
-    let ghostWindowElement = document.querySelector("#ghost-window");
+    let ghostWindowElement = document.querySelector('#'+selector);
     
     console.log(width - ghostMargin*2 +'px');
     setTimeout(() => {
@@ -552,23 +553,22 @@ function showGhostWindow( greenWindow = {} , width, height ) {
 //
 
 // remove ghost window for mouseup
-function removeGhostWindow( selector = "#ghost-window" ) {
-    if (document.querySelector(selector)) {
-        let ghost = document.querySelector("#ghost-window"),
+function removeGhostWindow( id = 0 ) {
+    let selector = `#ghost-window-${id}`,
+        ghost = document.querySelector(selector),
         transition = getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'),
         timeout = parseFloat(transition) * 1000 + 1;
         ghost.style.transition = transition;
-        ghost.style.width = 0;
-        ghost.style.height = 0;
-        ghost.style.opacity = 0;
-        console.log(getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'));
-        console.log(timeout);
-        ghost.style.left = ghost.getAttribute('mouse-position') + 'px';
-        
-        setTimeout(() => {
-            if (document.querySelector(selector)) document.querySelector("#ghost-window").remove();
-        }, timeout);
-    }
+    ghost.style.width = 0;
+    ghost.style.height = 0;
+    ghost.style.opacity = 0;
+    console.log(getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'));
+    console.log(timeout);
+    ghost.style.left = ghost.getAttribute('mouse-position') + 'px';
+    
+    setTimeout(() => {
+        if (document.querySelector(selector)) document.querySelector(selector).remove();
+    }, timeout);
 }
 //
 
@@ -591,7 +591,8 @@ function windowsDraging ( windowHead = {} ) {
             windowWidth = window.innerWidth,
             windowHeight = window.innerHeight,
             usableHeight = windowHeight - document.querySelector("#taskbar-overlay").offsetHeight,
-            needModal = false
+            needModal = false,
+            ghostWindowId = 0
         ;
         currentWindow.style.position = 'absolute';
         moveAt(e);
@@ -602,7 +603,6 @@ function windowsDraging ( windowHead = {} ) {
             currentWindow.style.left = e.pageX - shiftX + 'px';
             currentWindow.style.top = e.pageY - shiftY + 'px';
         }
-        removeGhostWindow();
 
         document.onmousemove = function(e) {
             moveAt(e);
@@ -610,11 +610,12 @@ function windowsDraging ( windowHead = {} ) {
             // showGhostWindow();
 
             
-            if ( parseInt(currentWindow.style.top) <= 0 ){
+            if ( parseInt(currentWindow.style.top) <= 0 && document.querySelector(`#ghost-window-${ghostWindowId}`) == null ){
                 console.log(e.pageY);
-                showGhostWindow(currentWindow, windowWidth, usableHeight);
-            } else if ( document.querySelector("#ghost-window") && parseInt(currentWindow.style.top) > 0 ) {
-                if (document.querySelector("#ghost-window")) removeGhostWindow();
+                showGhostWindow(currentWindow, windowWidth, usableHeight, ghostWindowId);
+            } else if ( document.querySelector(`#ghost-window-${ghostWindowId}`) && parseInt(currentWindow.style.top) > 0 ) {
+                if (document.querySelector(`#ghost-window-${ghostWindowId}`)) removeGhostWindow(ghostWindowId);
+                ghostWindowId++;
             }
             
             if ( e.pageY < 0 ){
@@ -637,7 +638,7 @@ function windowsDraging ( windowHead = {} ) {
             // console.log(e.pageX);
         };
         windowHead.onmouseup = function() {
-            if (document.querySelector("#ghost-window")) removeGhostWindow();
+            if (document.querySelector(`#ghost-window-${ghostWindowId}`)) removeGhostWindow(ghostWindowId);
             
             document.onmousemove = null;
             currentWindow.onmouseup = null;
