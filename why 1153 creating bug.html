@@ -8,6 +8,38 @@
     <title>Decard Autumn</title>
 </head>
 <body>
+    <div id="animated" style="position: absolute;left: 549.5px;">Hello there.</div>
+    <button onclick="start()">Start</button>
+    <button onclick="stop()">Stop</button>
+        <script type="text/javascript">
+            var elm = document.getElementById("animated");
+            var stopped;
+            var requestId = 0;
+            var starttime;
+    
+            function render(time) {
+                // set left style to a function of time.
+              if (!stopped) {
+                elm.style.left = ((Date.now() - starttime) / 4 % 600) + "px";
+                requestId = window.requestAnimationFrame(render);
+                }
+                if (parseInt(elm.style.left) > 300) {
+                    stop();
+                }
+            }
+    
+            function start() {
+                starttime = Date.now();
+                requestId = window.requestAnimationFrame(render);
+                stopped = false;
+            }
+            function stop() {
+                if (requestId) {
+                    window.cancelAnimationFrame(requestId);
+                }
+                stopped = true;
+            }
+    </script>
     <!-- <div id="triger">Click here</div> -->
     <div id="taskbar-wrap">
         <div id="menu-wrap">
@@ -572,6 +604,96 @@ function clearGhosts() {
     ghostWindowId++;
 }
 
+
+let animations = {},
+    animatedProps = {};
+
+function animateByPixel({
+    duration = 750, // ms
+    timing = {},
+    draw = {},
+    styleObj = {},
+    property = 'width',
+    number   = 1,
+    timeInPx = 1,
+    summation = true,
+    subtraction = false
+    }) {
+
+    let start = performance.now(),
+            fisrstCount = parseInt(styleObj.style[property]);
+
+   
+    animations[property] = window.requestAnimationFrame(function animateByPixel(time) {
+    // timeFraction от 0 до 1
+        let timeFraction = (time - start) / duration;
+        if (timeFraction > 1) timeFraction = 1;
+
+        // if ( animations[0] !== undefined ) animations.forEach(function(){window.cancelAnimationFrame(this)});
+    // setTimeout(() => {
+    //     number = 450;
+    //     // сделай обьект снаружи с размерами в который будешь изменять значения при увеличении/уменьшении окна во время работы анимации,
+    //     // и в анимацию брать конечный размер снаружи
+    // }, 1500);
+
+        // текущее состояние анимации
+        let progress = time - start,
+            size,
+            obj = animatedProps[property];
+        // console.log(timeFraction);
+
+        console.log(animatedProps);
+        if ( !animatedProps[property] )animatedProps[property] = {};
+        if ( !animatedProps[property].previous ) animatedProps[property].previous = 0;
+        
+
+        
+        if ( !animatedProps[property].end) animatedProps[property].end = number;
+        // size = obj.end - obj.startedSize;
+        animatedProps[property].timeLeft = Math.floor(duration - duration * timeFraction);
+        // animatedProps[property].current = animatedProps[property].previous + Math.floor( (animatedProps[property].end - animatedProps[property].previous) * timeFraction);
+        animatedProps[property].current = animatedProps[property].end* timeFraction;
+        styleObj.style[property] = animatedProps[property].end* timeFraction  + 'px';
+        // console.log(animatedProps[property].end);
+        // console.log(animatedProps[property].current);
+        styleObj.setAttribute('time-fraction', animatedProps[property].timeLeft);
+
+        // animatedProps.width.end  = animatedProps.width.end + animatedProps.width.end - animatedProps.width.startedSize;
+        // if (summation) {
+        //     if (  number * timeFraction > fisrstCount ){
+        //         styleObj.style[property] = number * timeFraction + 'px';
+        //     }
+        // } else if (subtraction) {
+        //     if (  number * timeFraction > fisrstCount ){
+        //         styleObj.style[property] = number * timeFraction + 'px';
+        //     }
+        // }
+
+        if (timeFraction < 1) {
+            animations[property] = window.requestAnimationFrame(animateByPixel);
+        }
+    });
+}
+
+function cancel() {
+    for (const key in animations) {
+        if (Object.hasOwnProperty.call(animations, key)) {
+            const element = animations[key];
+            console.log(animations[key]);
+            window.cancelAnimationFrame(animations[key]);
+        }
+    }
+    // animatedProps = {};
+    animations = {};
+    // animations.forEach( function (item, index, array) {
+    //     window.cancelAnimationFrame(item);
+    //     animations.splice(index, 1);
+    //     console.log(animations);
+    //     animations[item];
+    // });
+    () => callback();
+    return;
+}
 function showGhost({
     id        = 0,
     width     = 250,
@@ -585,9 +707,7 @@ function showGhost({
     posToLeft = -9999,
     posToTop  = -9999,
     posToBott = -9999,
-    instantTrans = true,
-    counter = 300,
-    currentWindow = {},
+    instantTrans = false,
     ...rest
     }) {
     unexpectedParams(rest);
@@ -597,61 +717,52 @@ function showGhost({
         return;
     } else if ( document.querySelector(`#ghost-window-${id}`) !== null && toIfExist ) {
         let ghostWindowElement = document.querySelector('#ghost-window-'+id);
-        console.log(counter);
-        console.log(width +'px');
+        ghostWindowElement.style.right = posToLeft+'px';
+
+        // let timmeout = setTimeout(() => {
+                
+
+
+        
+        // animatedProps[property].end = number;
+        // size = obj.end - obj.startedSize;
+        // animatedProps[property].timeLeft = Math.floor(duration - duration * timeFraction);
+        // animatedProps[property].current = animatedProps[property].previous + Math.floor( (animatedProps[property].end - animatedProps[property].previous) * timeFraction);
+        
+        // ghostWindowElement.style.width = (animatedProps.width.end*2 - animatedProps.width.startedSize) +  'px';
+
+        console.log(width - animatedProps.width.startedSize);
+        console.log();
+        animatedProps.width.end = width;
+        // animatedProps.width.end  = animatedProps.width.end + animatedProps.width.end - animatedProps.width.startedSize;
+        // let timer;
+        // clearTimeout(timer);
+        // timer = setTimeout(() => { 
+        //     cancel();
+        //     animatedProps.width.previous = animatedProps.width.current;
+        //     animateByPixel({ duration: ghostWindowElement.getAttribute('time-fraction'), styleObj: ghostWindowElement, property: 'width', number: width, summation: true });
+        // }, 20);
+
+        // animateByPixel({ duration: ghostWindowElement.getAttribute('time-fraction'), styleObj: ghostWindowElement, property: 'height', number: height,  summation: true });
+
+        //     clearTimeout(timmeout);
+        // }, ghostWindowElement.getAttribute('time-fraction'));
+        //     console.log('animations');
+        
+        // animateByPixel({ styleObj: ghostWindowElement.style, property: 'width', number: width, summation: true });
+        // ghostWindowElement.style.width = width+'px';
+        // console.log(animations);
         setTimeout(() => {
             
-            if ( instantTrans  ) {
-                // console.log('instantTrans');
-                // if ( ghostWindowElement.style.transition != 'all 0s ease 0s' ) ghostWindowElement.style.transition = '0.1s';
-                // let fastTrans = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'))*1000;
-            //     setTimeout(() => {
-            //         if ( ghostWindowElement.classList.contains('trnas-unblocked2') ) {
-            //             ghostWindowElement.classList.remove('trnas-unblocked2');
-            //         }
-            //         ghostWindowElement.style.width = width +'px';
-            //         ghostWindowElement.style.transition = `all 0.${750 - counter}s`;
-            //         console.log('trnas-unblocked');
-                
-            //     }, 750 - counter);
-            //     // setTimeout(() => {
-            //     //     if ( ghostWindowElement.classList.contains('trnas-unblocked') ) {
-                            
-            //     //         ghostWindowElement.classList.remove('trnas-unblocked');
-            //     //         ghostWindowElement.classList.add('trans-active');
-            //     //     }
-            //     // }, 500);
-            //     // ghostWindowElement.style.left = '799px';
-            //     // ghostWindowElement.style.top = '0px';
-            //     return;
-            // } else if ( instantTrans && counter >= 750 ) {
-                
-            //     setTimeout(() => {
-                let pposToLeft = 10+posToLeft;
-                ghostWindowElement.style.left = counter +'px';
-                ghostWindowElement.style.width = width +'px';
-                ghostWindowElement.style.transition = `all 0s`;
-                console.log(pposToLeft);
-                console.log('trnas-unblocked');
-                
-                // }, 7);
+            if ( !ghostWindowElement.classList.contains('first-move') && instantTrans ) {
+                setTimeout(() => {
+                    ghostWindowElement.style.left = posToLeft +'px';
+                    ghostWindowElement.style.width = width +'px';
+                    ghostWindowElement.style.transition = `all 0s`;
+                    console.log('trnas-unblocked');
+                }, 6);
             }
-            // if ( instantTrans && ghostWindowElement.classList.contains('trans-active') ) {
-            //     // console.log('instantTrans');
-            //     // if ( ghostWindowElement.style.transition != 'all 0s ease 0s' ) ghostWindowElement.style.transition = '0.1s';
-            //     // let fastTrans = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'))*1000;
-            //     // setTimeout(() => {
-            //         ghostWindowElement.style.transition = 'all 0s ease 0s';
-            //         ghostWindowElement.style.width = width +'px';
-            //         console.log('trans-active');
-                
-            //     // }, 100);
-            //     // ghostWindowElement.classList.add('trans-none');
-            //     // ghostWindowElement.style.left = '799px';
-            //     // ghostWindowElement.style.top = '0px';
-            //     return;
-            // }
-            if ( ghostWindowElement.classList.contains('first-move') ) {
+            if ( ghostWindowElement.classList.contains('first-move') || !instantTrans ) {
 
                 if ( posToLeft !== -9999 ) ghostWindowElement.style.left = posToLeft +'px';
                 if ( posToTop  !== -9999 ) ghostWindowElement.style.top = posToTop +'px';
@@ -659,17 +770,11 @@ function showGhost({
                 ghostWindowElement.style.width = width +'px';
                 ghostWindowElement.style.height = height +'px';
                 ghostWindowElement.classList.remove('first-move');
-                // if ( ghostWindowElement.style.transition != 'all 0s ease 0s' ) ghostWindowElement.style.transition = '0.01s'; getComputedStyle(document.documentElement).getPropertyValue('--fast-transition')+
             }
 
         }, 6);
-        // setTimeout(() => {
-        //     ghostWindowElement.style.transition = '0s';
-        // }, 100);
-        // console.log("toIfExist === true; already exist but moved");
         return;
     }
-    // posBott = ( pxsToTaskBar <= 0 || posBott !== 0 ) ? `bottom: ${taskBarHeight - ghostBorderWidth*2}px;` : '';
     if ( !fromTo ) { // if false - default
         let ghostWindow = `
             <div id="ghost-window-${id}" class="ghost-window"
@@ -696,10 +801,14 @@ function showGhost({
     } else if ( fromTo ) {
         let ghostWindow = `
             <div id="ghost-window-${id}" class="ghost-window"
-                style="z-index: ${currentZindex - 2};
-                left: ${ (posLeft !== -9999) ? posLeft : '' }px;
-                top: ${ (posTop !== -9999) ? posTop : '' }px;
-                bottom: ${ (posBott !== -9999) ? posBott : '' }px;
+                style="
+                    z-index: ${currentZindex - 2};
+                    right:   ${ (posLeft !== -9999) ? posLeft : '' }px;
+                    top:     ${ (posTop  !== -9999) ? posTop  : '' }px;
+                    bottom:  ${ (posBott !== -9999) ? posBott : '' }px;
+                    width: 0px;
+                    height: 0px;
+                "
                 mouse-position="${posLeft}">
             </div>`
         ;
@@ -707,25 +816,68 @@ function showGhost({
         
         let ghostWindowElement = document.querySelector('#ghost-window-'+id);
 
-        // console.log('fromTo === true');
-        setTimeout(() => {
-            ghostWindowElement.style.width = width +'px';
-            ghostWindowElement.style.height = height +'px';
-        }, 5);  
-        setTimeout(() => {
-            if ( posToLeft !== -9999 ) ghostWindowElement.style.left = posToLeft +'px';
-            if ( posToTop  !== -9999 ) ghostWindowElement.style.top = posToTop +'px';
-            if ( posToBott !== -9999 ) ghostWindowElement.style.bottom = posToBott +'px';
-            ghostWindowElement.classList.add('first-move');
-        }, 6);       
+        let x = 125;
+        let a = (width/x >= 1) ? Math.round(width/x) : 1,
+            b = (height/x >= 1) ? Math.round(height/x) : 1,
+            c = (posLeft/x >= 1) ? Math.round(posLeft/x) : 1;
+        console.log(a);
+        console.log(b);
+        console.log('fromTo === true');
+        console.log(width);
+        console.log(height);
+        // console.log(c);
+        animatedProps.width = {};
+        animatedProps.width.startedSize = width;
+        // animatedProps.width.startedMouse = width;
+        // console.log(animateByPixel({ styleObj: ghostWindowElement, property: 'width', number: width, summation: true }));
+        // console.log(animateByPixel({ styleObj: ghostWindowElement, property: 'height', number: height,  summation: true }));
+        // animateByPixel({ styleObj: ghostWindowElement.style, property: 'right', number: posToLeft, subtraction: true });
+        // animateByPixel({ styleObj: ghostWindowElement.style, property: 'bottom', number: 70, timeInPx: 1, subtraction: true });
+        // animatePixels(ghostWindowElement.style, 'height', height);
+        // animatePixels(ghostWindowElement.style, 'right', posToLeft, false);
+        // animatePixels(ghostWindowElement.style, 'top', posToTop, false);
+        // let timerId = setTimeout(function tick() {
+        //     if ( parseInt(ghostWindowElement.style.width) >= width ) {
+        //         if ( parseInt(ghostWindowElement.style.width) !== width ) ghostWindowElement.style.width = width+'px'; 
+        //         return;
+        //     }
+        //     ghostWindowElement.style.width = parseInt(ghostWindowElement.style.width) + 25 + 'px';
+        //     timerId = setTimeout(tick, 1); // (*)
+        // }, 1);
+        // let timerId2 = setTimeout(function tick() {
+        //     if ( parseInt(ghostWindowElement.style.height) >= height ) {
+        //         if ( parseInt(ghostWindowElement.style.height) !== height ) ghostWindowElement.style.height = height+'px'; 
+        //         return;
+        //     }
+        //     ghostWindowElement.style.height = parseInt(ghostWindowElement.style.height) + 25 + 'px';
+        //     timerId2 = setTimeout(tick, 1); // (*)
+        // }, 1);
+        
+        
+        // let timerId3 = setTimeout(function tick() {
+        // if ( parseInt(ghostWindowElement.style.right) <= posToLeft ) {
+        //     if ( parseInt(ghostWindowElement.style.right) !== posToLeft ) ghostWindowElement.style.right = posToLeft+'px'; 
+        //     return;
+        // }
+        //     ghostWindowElement.style.right = parseInt(ghostWindowElement.style.right) - 25 + 'px';
+        //     timerId3 = setTimeout(tick, 1); // (*)
+        // }, 1);
+        // let timerId4 = setTimeout(function tick() {
+        // if ( parseInt(ghostWindowElement.style.top) <= posToTop ) {
+        //     if ( parseInt(ghostWindowElement.style.top) !== posToTop ) ghostWindowElement.style.top = posToTop+'px'; 
+        //     return;
+        // }
+        //     ghostWindowElement.style.top = parseInt(ghostWindowElement.style.top) - 25 + 'px';
+        //     timerId4 = setTimeout(tick, 1); // (*)
+        // }, 1);
 
-        // setTimeout(() => {
-        //     ghostWindowElement.classList.add('trnas-unblocked');
-        //     ghostWindowElement.classList.add('trnas-unblocked2');
-        // }, 750);       
+        if ( posToLeft !== -9999 ) ghostWindowElement.style.left = posToLeft +'px';
+        if ( posToTop  !== -9999 ) ghostWindowElement.style.top = posToTop +'px';
+        if ( posToBott !== -9999 ) ghostWindowElement.style.bottom = posToBott +'px';
+        ghostWindowElement.classList.add('first-move');
+            
     }
 }
-    
 
 // moving window by drug heading,
 let ghostWindowId = 0; // global variable for index of ghost windows
@@ -1143,15 +1295,14 @@ document.onmousedown = function(event) {
                     id       : ghostWindowId,
                     width    : currentWindow.offsetWidth,
                     height   : defaultGhostH,
-                    posLeft  : event.pageX,
-                    posTop   : event.pageY,
+                    posLeft  : usableWidth - event.pageX,
+                    posBott  : 70,
                     fromTo   : true,
                     toIfExist: true,
-                    posToLeft: parseInt(currentWindow.style.left) - bordersWidth - 2,
-                    posToTop : 0,
+                    posToLeft: usableWidth - parseInt(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2,
+                    posToBott : 0,
                     instantTrans: true,
-                    counter  : parseInt(currentWindow.style.left) - bordersWidth - 2,
-                    currentWindow: currentWindow
+                    useBottom: true
                 });
             } else {
                 clearGhosts();
@@ -1177,6 +1328,7 @@ document.onmousedown = function(event) {
             }, 10);
             document.querySelector("html").style.cursor = '';
             taskbarOverlay.style.zIndex = '';
+            cancel();
             return false;
         }
     });

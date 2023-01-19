@@ -606,7 +606,6 @@ function clearGhosts() {
     ghostWindowId++;
 }
 
-
 let animations = {},
     animationProps = {};
 
@@ -627,48 +626,39 @@ function animateByPixel({
     property = 'width',
     number   = 1
     }) {
-
     let start = performance.now();
 
     animations[property] = window.requestAnimationFrame(function animateByPixel(time) {
     // timeFraction от 0 до 1
-        let timeFraction = (time - start) / duration;
+        let timeFraction = (time - start) / duration,
+            obj = animationProps[property];
         if (timeFraction > 1) timeFraction = 1;
-
-        let obj = animationProps[property];
-
-        // console.log(property);
-        // obj.end = number;
+        
+        obj.timerID = animations[property];
         obj.timeLeft = Math.floor(duration - duration * timeFraction);
-        obj.current = obj.start + ( obj.end - obj.start ) * timeFraction;
+        obj.current = Math.round(obj.start + ( obj.end - obj.start ) * timeFraction);
         HTMLelement.style[property] = obj.start + ( obj.end - obj.start ) * timeFraction  + 'px';
         HTMLelement.setAttribute('time-left', obj.timeLeft);
 
         if (timeFraction < 1) {
-            animations[property] = window.requestAnimationFrame(animateByPixel);
+            obj.timerID = animations[property] = window.requestAnimationFrame(animateByPixel);
         } else {
             HTMLelement.setAttribute('time-left', '0');
         }
     });
 }
 
-function cancel() {
+function cancelAnimateByPixel() {
     clearAnimationsObj();
-    // animationProps = {};
-    // animations.forEach( function (item, index, array) {
-    //     window.cancelAnimationFrame(item);
-    //     animations.splice(index, 1);
-    //     console.log(animations);
-    //     animations[item];
-    // });
     () => callback();
     return;
 }
 
 function showGhost({
-    id     = 0,
-    toEnd  = false,
-    params = {
+    id      = 0,
+    toEnd   = false,
+    instEnd = true,
+    params  = {
         width  : { start: 0, end: 0 },
         height : { start: 0, end: 0 },
         top    : { start: 0, end: 0 },
@@ -704,33 +694,27 @@ function showGhost({
     unexpectedParams(rest);
     
     if ( document.querySelector(`#ghost-window-${id}`) !== null && !toEnd ) {
-        // console.log("toIfExist === false; already exist");
+        // console.log("toEnd === false; already exist");
         return;
-    // when ghost exist and toIfExist === true
+    // when ghost exist and toEnd === true
     } else if ( document.querySelector(`#ghost-window-${id}`) !== null && toEnd ) {
         let ghostWindowElement = document.querySelector('#ghost-window-'+id),
             timeLeftToAnimate = parseInt(ghostWindowElement.getAttribute('time-left'));
-
-        // ghostWindowElement.style.right = params.right.end+'px';
-
         for (const key in params) {
             let value = params[key];
-            // сделать чтоб анмиацию норм была при упорах
-            if ( timeLeftToAnimate > 0 ) {
+            if ( animationProps[key].end != params[key].end && instEnd === false ) {
+                window.cancelAnimationFrame(animations[key]);
+                animationProps[key].start = animationProps[key].current;
                 animationProps[key].end = params[key].end;
-            // } else if ( animationProps[key].end != params[key].end ) {
-            //     animationProps[key].start = animationProps[key].current;
-            //     animationProps[key].current = 0;
-            //     animateByPixel({ HTMLelement: ghostWindowElement, property: key, number: params[key].end });
+                animationProps[key].current = 0;
+                animateByPixel({ HTMLelement: ghostWindowElement, property: key, number: params[key].end });
+            } else if ( timeLeftToAnimate > 0 ) {
+                animationProps[key].end = params[key].end;
             } else {
-                ghostWindowElement.style.transition = getComputedStyle(document.documentElement).getPropertyValue('--default-transition');
                 ghostWindowElement.style[key] = params[key].end +'px';
             }
             if ( !params[key].hasOwnProperty('end') ) ghostWindowElement.style[key] = params[key].start+'px';
-        }
-
-        // animationProps.height.endValue = height;
-        
+        }        
         return;
     }
     
@@ -758,7 +742,7 @@ function showGhost({
             if ( parseInt(params[key].end) >= 0 ) animateByPixel({ HTMLelement: ghostWindowElement, property: key, number: params[key].end });
         }
 
-        console.log(animationProps);
+        // console.log(animationProps);
         ghostWindowElement.classList.add('first-move');
             
     }
@@ -786,10 +770,10 @@ function windowsDraging ( windowHead = {} ) {
             usableHeight = getUsableHeight(),
             ghostWidth = usableWidth - ghostMargin*2,
             ghostHeight = usableHeight- ghostMargin*2,
-            ghostHalfWidth = ghostWidth / 2 - ghostMargin,
-            ghostHalfHeight = ghostHeight / 2 - ghostMargin,
-            posHalfBottom = usableHeight - ghostHeight / 2 - ghostMargin,
-            posHalfLeft = usableWidth - ghostWidth / 2 - ghostMargin,
+            ghostHalfWidth = Math.round(ghostWidth / 2 - ghostMargin),
+            ghostHalfHeight = Math.round(ghostHeight / 2 - ghostMargin),
+            posHalfBottom = Math.round(usableHeight - ghostHeight / 2 - ghostMargin),
+            posHalfLeft = Math.round(usableWidth - ghostWidth / 2 - ghostMargin),
             needModal = false,
             taskbarOverlay = document.querySelector("#taskbar-overlay"),
             maximizeTop = 150,
@@ -833,20 +817,10 @@ function windowsDraging ( windowHead = {} ) {
             // show ghost window when mouse close to outside
             if ( parseInt(currentWindow.style.top) <= 0 ) { // top border
                 if ( event.pageX < maximizeTop ) { // left
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostHalfWidth },
                             height : { start: 0, end: ghostHalfHeight },
@@ -855,20 +829,10 @@ function windowsDraging ( windowHead = {} ) {
                         }
                     });
                 } else if ( usableWidth - event.pageX < maximizeTop ) { // right
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : 0,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: usableWidth-ghostWidth/2-ghostMargin,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostHalfWidth },
                             height : { start: 0, end: ghostHalfHeight },
@@ -877,20 +841,10 @@ function windowsDraging ( windowHead = {} ) {
                         }
                     });
                 } else { // middle
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostWidth,
-                    //     height   : ghostHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : false,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostWidth },
                             height : { start: 0, end: ghostHeight },
@@ -904,20 +858,10 @@ function windowsDraging ( windowHead = {} ) {
                     topBottom = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY: usableHeight - ghostHeight/2-ghostMargin,
                     top = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY : 0;
                 if ( event.pageY < maximizeTop ) { // top
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostHalfWidth },
                             height : { start: 0, end: ghostHalfHeight },
@@ -926,20 +870,10 @@ function windowsDraging ( windowHead = {} ) {
                         }
                     });
                 } else if ( usableHeight - event.pageY < maximizeTop ) { // bottom
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : 0,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : posHalfBottom
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostHalfWidth },
                             height : { start: 0, end: ghostHalfHeight },
@@ -948,20 +882,10 @@ function windowsDraging ( windowHead = {} ) {
                         }
                     });
                 } else { // middle
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHeight,
-                    //     posStartLeft  : 0,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostHalfWidth },
                             height : { start: 0, end: ghostHeight },
@@ -975,20 +899,10 @@ function windowsDraging ( windowHead = {} ) {
                     top = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY : 0,
                     left = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageX : usableWidth - ghostWidth/2-ghostMargin;
                 if ( event.pageY < maximizeTop ) { // top
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: posHalfLeft,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostHalfWidth },
                             height : { start: 0, end: ghostHalfHeight },
@@ -998,19 +912,10 @@ function windowsDraging ( windowHead = {} ) {
                     });
                 } else if ( usableHeight - event.pageY < maximizeTop ) { // bottom
                     // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: posHalfLeft,
-                    //     posEndTop : posHalfBottom
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostHalfWidth },
                             height : { start: 0, end: ghostHalfHeight },
@@ -1019,20 +924,10 @@ function windowsDraging ( windowHead = {} ) {
                         }
                     });
                 } else { // middle
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: posHalfLeft,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
+                        instEnd: false,
                         params: {
                             width  : { start: 0, end: ghostHalfWidth },
                             height : { start: 0, end: ghostHeight },
@@ -1054,6 +949,7 @@ function windowsDraging ( windowHead = {} ) {
             taskbarOverlay.onmouseup = null;
             taskbarOverlay.style.zIndex = '';
             if ( taskbarOverlay.style.cursor == 'pointer' ) taskbarOverlay.style.cursor = '';
+            cancelAnimateByPixel();
         }
     }
     windowHead.ondragstart = function() {
@@ -1298,6 +1194,7 @@ document.onmousedown = function(event) {
                             // // here is second way of this animations, just use both params
                             // start: usableWidth - event.pageX,
                             // end:   usableWidth - parseInt(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2
+                            // start: event.pageX, end: windowLeft - 2
                             start: windowLeft - 2
                         },
                     }
@@ -1393,7 +1290,7 @@ document.onmousedown = function(event) {
             }, 10);
             document.querySelector("html").style.cursor = '';
             taskbarOverlay.style.zIndex = '';
-            cancel();
+            cancelAnimateByPixel();
             return false;
         }
     });
