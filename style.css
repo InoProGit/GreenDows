@@ -25,7 +25,8 @@ darkGray - #272727
     --cursor-vertical-resize: e-resize;
     --cursor-xy-resize: nwse-resize;
     
-    --ghost-window-margin: 10px;
+    --ghost-window-margin: 5px;
+    --ghost-window-border-width: 2px;
 }
 
 .window-borders .outside {cursor: default;}
@@ -36,6 +37,10 @@ darkGray - #272727
     font-family: 'IBM Plex Sans', sans-serif;
     line-height: 1.3em;
     letter-spacing: 0.02em;
+}
+
+.trans-none {
+    transition: all 0s !important;
 }
 
 .transition {
@@ -324,9 +329,9 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 .window-head {
     position: absolute;
     width: 100%;
-    margin-left: -5px;
+    /* margin-left: -5px; */
     display: flex;
-    top: 3px;
+    top: 2px;
     cursor: pointer;
 }
 
@@ -532,20 +537,25 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 #taskbar-overlay {
     position: absolute;
-    bottom: 0px;
-    height: 68px;
+    bottom: -2px;
+    height: 70px;
     background: transparent;
     width: 100%;
 }
 
 .ghost-window {
     position: absolute;
-    border: 2px solid rgb(0,255,0);
+    border: var(--ghost-window-border-width) solid rgb(0,255,0);
     border-radius: 10px;
     box-shadow: 0px 0px 46px 28px var(--border-dark-color);
-    background: green;opacity: 0.35;
+    background: green;
+    opacity: 0.35;
     transition: var(--default-transition);
+    /* margin: var(--ghost-window-margin); */
+    width: 0;
+    height: 0;
     /* transform: scale(0); */
+    z-index: 99999999999 !important;
 }
 
 .default-cursor {
@@ -553,7 +563,9 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 }
 
 
-
+.trans-none {
+    transition: all 0s;
+}
 
 
 

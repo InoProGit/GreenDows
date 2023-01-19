@@ -8,38 +8,6 @@
     <title>Decard Autumn</title>
 </head>
 <body>
-    <div id="animated" style="position: absolute;left: 549.5px;">Hello there.</div>
-    <button onclick="start()">Start</button>
-    <button onclick="stop()">Stop</button>
-        <script type="text/javascript">
-            var elm = document.getElementById("animated");
-            var stopped;
-            var requestId = 0;
-            var starttime;
-    
-            function render(time) {
-                // set left style to a function of time.
-              if (!stopped) {
-                elm.style.left = ((Date.now() - starttime) / 4 % 600) + "px";
-                requestId = window.requestAnimationFrame(render);
-                }
-                if (parseInt(elm.style.left) > 300) {
-                    stop();
-                }
-            }
-    
-            function start() {
-                starttime = Date.now();
-                requestId = window.requestAnimationFrame(render);
-                stopped = false;
-            }
-            function stop() {
-                if (requestId) {
-                    window.cancelAnimationFrame(requestId);
-                }
-                stopped = true;
-            }
-    </script>
     <!-- <div id="triger">Click here</div> -->
     <div id="taskbar-wrap">
         <div id="menu-wrap">
@@ -235,15 +203,13 @@ function blockClicked ( element = {}, time = 0 ) {
 
 // checking object for emptiness
 function isEmptyObject ( rest = {} ) {
-    return ( Object.keys(rest).length === 0 && rest.constructor === Object ) ?  true : false;
+    return ( Object.keys(rest).length === 0 && rest.constructor === Object ) ?  true :  true;
 }
 //
 
 // checking unexpected params in function, if have throw error
 function unexpectedParams(rest) {
-    if ( !isEmptyObject(rest) ) throw new TypeError( message = `
-Unexpected params given: ` + JSON.stringify(rest) + ` .
-Make params align with expectations.` );
+    if ( !isEmptyObject(rest) ) throw new TypeError( message = 'Unexpected params given:' + JSON.stringify(rest) );
 }
 //
 
@@ -606,163 +572,160 @@ function clearGhosts() {
     ghostWindowId++;
 }
 
-
-let animations = {},
-    animationProps = {};
-
-function clearAnimationsObj() {
-    for (const key in animations) {
-        if (Object.hasOwnProperty.call(animations, key)) {
-            const element = animations[key];
-            console.log(animations[key]);
-            window.cancelAnimationFrame(animations[key]);
-        }
-    }
-    animations = {};
-}
-
-function animateByPixel({
-    duration = 750, // ms
-    HTMLelement = {},
-    property = 'width',
-    number   = 1
-    }) {
-
-    let start = performance.now();
-
-    animations[property] = window.requestAnimationFrame(function animateByPixel(time) {
-    // timeFraction от 0 до 1
-        let timeFraction = (time - start) / duration;
-        if (timeFraction > 1) timeFraction = 1;
-
-        let obj = animationProps[property];
-
-        // console.log(property);
-        // obj.end = number;
-        obj.timeLeft = Math.floor(duration - duration * timeFraction);
-        obj.current = obj.start + ( obj.end - obj.start ) * timeFraction;
-        HTMLelement.style[property] = obj.start + ( obj.end - obj.start ) * timeFraction  + 'px';
-        HTMLelement.setAttribute('time-left', obj.timeLeft);
-
-        if (timeFraction < 1) {
-            animations[property] = window.requestAnimationFrame(animateByPixel);
-        } else {
-            HTMLelement.setAttribute('time-left', '0');
-        }
-    });
-}
-
-function cancel() {
-    clearAnimationsObj();
-    // animationProps = {};
-    // animations.forEach( function (item, index, array) {
-    //     window.cancelAnimationFrame(item);
-    //     animations.splice(index, 1);
-    //     console.log(animations);
-    //     animations[item];
-    // });
-    () => callback();
-    return;
-}
-
 function showGhost({
-    id     = 0,
-    toEnd  = false,
-    params = {
-        width  : { start: 0, end: 0 },
-        height : { start: 0, end: 0 },
-        top    : { start: 0, end: 0 },
-        left   : { start: 0, end: 0 },
-        bottom : { start: 0, end: 0 },
-        right  : { start: 0, end: 0 },
-    },
+    id        = 0,
+    width     = 250,
+    height    = 250,
+    posLeft   = -9999,
+    posTop    = -9999,
+    posBott   = -9999,
+    fromTo    = false,
+    toIfExist = false,
+    useBottom = false,
+    posToLeft = -9999,
+    posToTop  = -9999,
+    posToBott = -9999,
+    instantTrans = true,
+    counter = 300,
+    currentWindow = {},
     ...rest
     }) {
-    for (const key in params) {
-        let value = params[key];
-        if (
-            key === 'width' ||
-            key === 'height' ||
-            key === 'top' ||
-            key === 'left' ||
-            key === 'bottom' ||
-            key === 'right'
-        ) {
-            for (const keyInner in params[key]) {
-                if ( keyInner !== 'start' && keyInner !== 'end' ) {
-                    unexpectedParams(params[key]);
-                }
-                if ( !params[key].hasOwnProperty('start') ) {
-                    console.error(`'${key}' must have a 'start' property.`);
-                    unexpectedParams(params[key]);
-                }
-            }
-        } else {
-            unexpectedParams(params);
-        }
-    }
     unexpectedParams(rest);
-    
-    if ( document.querySelector(`#ghost-window-${id}`) !== null && !toEnd ) {
+    if ( useBottom ) posTop = undefined, posToTop = undefined;
+    if ( document.querySelector(`#ghost-window-${id}`) !== null && !toIfExist ) {
         // console.log("toIfExist === false; already exist");
         return;
-    // when ghost exist and toIfExist === true
-    } else if ( document.querySelector(`#ghost-window-${id}`) !== null && toEnd ) {
-        let ghostWindowElement = document.querySelector('#ghost-window-'+id),
-            timeLeftToAnimate = parseInt(ghostWindowElement.getAttribute('time-left'));
-
-        // ghostWindowElement.style.right = params.right.end+'px';
-
-        for (const key in params) {
-            let value = params[key];
-            // сделать чтоб анмиацию норм была при упорах
-            if ( timeLeftToAnimate > 0 ) {
-                animationProps[key].end = params[key].end;
-            // } else if ( animationProps[key].end != params[key].end ) {
-            //     animationProps[key].start = animationProps[key].current;
-            //     animationProps[key].current = 0;
-            //     animateByPixel({ HTMLelement: ghostWindowElement, property: key, number: params[key].end });
-            } else {
-                ghostWindowElement.style.transition = getComputedStyle(document.documentElement).getPropertyValue('--default-transition');
-                ghostWindowElement.style[key] = params[key].end +'px';
+    } else if ( document.querySelector(`#ghost-window-${id}`) !== null && toIfExist ) {
+        let ghostWindowElement = document.querySelector('#ghost-window-'+id);
+        console.log(counter);
+        console.log(width +'px');
+        setTimeout(() => {
+            
+            if ( instantTrans  ) {
+                // console.log('instantTrans');
+                // if ( ghostWindowElement.style.transition != 'all 0s ease 0s' ) ghostWindowElement.style.transition = '0.1s';
+                // let fastTrans = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'))*1000;
+            //     setTimeout(() => {
+            //         if ( ghostWindowElement.classList.contains('trnas-unblocked2') ) {
+            //             ghostWindowElement.classList.remove('trnas-unblocked2');
+            //         }
+            //         ghostWindowElement.style.width = width +'px';
+            //         ghostWindowElement.style.transition = `all 0.${750 - counter}s`;
+            //         console.log('trnas-unblocked');
+                
+            //     }, 750 - counter);
+            //     // setTimeout(() => {
+            //     //     if ( ghostWindowElement.classList.contains('trnas-unblocked') ) {
+                            
+            //     //         ghostWindowElement.classList.remove('trnas-unblocked');
+            //     //         ghostWindowElement.classList.add('trans-active');
+            //     //     }
+            //     // }, 500);
+            //     // ghostWindowElement.style.left = '799px';
+            //     // ghostWindowElement.style.top = '0px';
+            //     return;
+            // } else if ( instantTrans && counter >= 750 ) {
+                
+            //     setTimeout(() => {
+                let pposToLeft = 10+posToLeft;
+                ghostWindowElement.style.left = counter +'px';
+                ghostWindowElement.style.width = width +'px';
+                ghostWindowElement.style.transition = `all 0s`;
+                console.log(pposToLeft);
+                console.log('trnas-unblocked');
+                
+                // }, 7);
             }
-            if ( !params[key].hasOwnProperty('end') ) ghostWindowElement.style[key] = params[key].start+'px';
-        }
+            // if ( instantTrans && ghostWindowElement.classList.contains('trans-active') ) {
+            //     // console.log('instantTrans');
+            //     // if ( ghostWindowElement.style.transition != 'all 0s ease 0s' ) ghostWindowElement.style.transition = '0.1s';
+            //     // let fastTrans = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'))*1000;
+            //     // setTimeout(() => {
+            //         ghostWindowElement.style.transition = 'all 0s ease 0s';
+            //         ghostWindowElement.style.width = width +'px';
+            //         console.log('trans-active');
+                
+            //     // }, 100);
+            //     // ghostWindowElement.classList.add('trans-none');
+            //     // ghostWindowElement.style.left = '799px';
+            //     // ghostWindowElement.style.top = '0px';
+            //     return;
+            // }
+            if ( ghostWindowElement.classList.contains('first-move') ) {
 
-        // animationProps.height.endValue = height;
-        
+                if ( posToLeft !== -9999 ) ghostWindowElement.style.left = posToLeft +'px';
+                if ( posToTop  !== -9999 ) ghostWindowElement.style.top = posToTop +'px';
+                if ( posToBott !== -9999 ) ghostWindowElement.style.bottom = posToBott +'px';
+                ghostWindowElement.style.width = width +'px';
+                ghostWindowElement.style.height = height +'px';
+                ghostWindowElement.classList.remove('first-move');
+                // if ( ghostWindowElement.style.transition != 'all 0s ease 0s' ) ghostWindowElement.style.transition = '0.01s'; getComputedStyle(document.documentElement).getPropertyValue('--fast-transition')+
+            }
+
+        }, 6);
+        // setTimeout(() => {
+        //     ghostWindowElement.style.transition = '0s';
+        // }, 100);
+        // console.log("toIfExist === true; already exist but moved");
         return;
     }
-    
-    let ghostWindow = `
-        <div id="ghost-window-${id}" class="ghost-window"
-            style="
-                z-index: ${currentZindex - 2};
-                left:   ${ (params.hasOwnProperty('left') && !params.hasOwnProperty('right') ) ? params.left.start : '' }px;
-                top:    ${ (params.hasOwnProperty('top')  && !params.hasOwnProperty('bottom')) ? params.top.start  : '' }px;
-                right:  ${ (params.hasOwnProperty('right') ) ? params.right.start  + 'px' : '' };
-                bottom: ${ (params.hasOwnProperty('bottom')) ? params.bottom.start + 'px' : '' };
-                width:  ${ (params.hasOwnProperty('width') ) ? params.width.start  + 'px' : '' };
-                height: ${ (params.hasOwnProperty('height')) ? params.height.start + 'px' : '' };
-            "
-            mouse-position-start="${ (params.hasOwnProperty('left') && !params.hasOwnProperty('right') ) ? params.left.start : params.right.start}">
-        </div>`
-    ;
-    document.querySelector("body").insertAdjacentHTML('beforeEnd', ghostWindow);
-    
-    let ghostWindowElement = document.querySelector('#ghost-window-'+id);
+    // posBott = ( pxsToTaskBar <= 0 || posBott !== 0 ) ? `bottom: ${taskBarHeight - ghostBorderWidth*2}px;` : '';
+    if ( !fromTo ) { // if false - default
+        let ghostWindow = `
+            <div id="ghost-window-${id}" class="ghost-window"
+                style="z-index: ${currentZindex - 2};
+                left: ${ (posLeft !== -9999) ? posLeft : '' }px;
+                top: ${ (posTop !== -9999) ? posTop : '' }px;
+                bottom: ${ (posBott !== -9999) ? posBott : '' }px;"
+                mouse-position="${posLeft}">
+            </div>`
+        ;
+        document.querySelector("body").insertAdjacentHTML('beforeEnd', ghostWindow);
+        
+        let ghostWindowElement = document.querySelector('#ghost-window-'+id);
 
-    if ( toEnd ) {
-        animationProps = params;        
-        for (const key in params) {
-            if ( parseInt(params[key].end) >= 0 ) animateByPixel({ HTMLelement: ghostWindowElement, property: key, number: params[key].end });
-        }
+        // console.log('fromTo === false');
+        setTimeout(() => {
+            ghostWindowElement.style.left = '0px';
+            ghostWindowElement.style.top = '0px';
+            ghostWindowElement.style.bottom = '0px';
+            ghostWindowElement.style.width = width +'px';
+            ghostWindowElement.style.height = height +'px';
+        }, 5);
 
-        console.log(animationProps);
-        ghostWindowElement.classList.add('first-move');
-            
+    } else if ( fromTo ) {
+        let ghostWindow = `
+            <div id="ghost-window-${id}" class="ghost-window"
+                style="z-index: ${currentZindex - 2};
+                left: ${ (posLeft !== -9999) ? posLeft : '' }px;
+                top: ${ (posTop !== -9999) ? posTop : '' }px;
+                bottom: ${ (posBott !== -9999) ? posBott : '' }px;
+                mouse-position="${posLeft}">
+            </div>`
+        ;
+        document.querySelector("body").insertAdjacentHTML('beforeEnd', ghostWindow);
+        
+        let ghostWindowElement = document.querySelector('#ghost-window-'+id);
+
+        // console.log('fromTo === true');
+        setTimeout(() => {
+            ghostWindowElement.style.width = width +'px';
+            ghostWindowElement.style.height = height +'px';
+        }, 5);  
+        setTimeout(() => {
+            if ( posToLeft !== -9999 ) ghostWindowElement.style.left = posToLeft +'px';
+            if ( posToTop  !== -9999 ) ghostWindowElement.style.top = posToTop +'px';
+            if ( posToBott !== -9999 ) ghostWindowElement.style.bottom = posToBott +'px';
+            ghostWindowElement.classList.add('first-move');
+        }, 6);       
+
+        // setTimeout(() => {
+        //     ghostWindowElement.classList.add('trnas-unblocked');
+        //     ghostWindowElement.classList.add('trnas-unblocked2');
+        // }, 750);       
     }
 }
+    
 
 // moving window by drug heading,
 let ghostWindowId = 0; // global variable for index of ghost windows
@@ -833,70 +796,40 @@ function windowsDraging ( windowHead = {} ) {
             // show ghost window when mouse close to outside
             if ( parseInt(currentWindow.style.top) <= 0 ) { // top border
                 if ( event.pageX < maximizeTop ) { // left
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostHalfWidth },
-                            height : { start: 0, end: ghostHalfHeight },
-                            top    : { start: event.pageY, end: 0 },
-                            left   : { start: event.pageX, end: 0 },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostHalfWidth,
+                        height   : ghostHalfHeight,
+                        posLeft  : event.pageX,
+                        posTop   : event.pageY,
+                        fromTo   : true,
+                        toIfExist: true,
+                        posToLeft: 0,
+                        posToTop : 0
                     });
                 } else if ( usableWidth - event.pageX < maximizeTop ) { // right
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : 0,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: usableWidth-ghostWidth/2-ghostMargin,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostHalfWidth },
-                            height : { start: 0, end: ghostHalfHeight },
-                            top    : { start: 0, end: 0 },
-                            left   : { start: event.pageX, end: usableWidth-ghostWidth/2-ghostMargin },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostHalfWidth,
+                        height   : ghostHalfHeight,
+                        posLeft  : event.pageX,
+                        posTop   : 0,
+                        fromTo   : true,
+                        toIfExist: true,
+                        posToLeft: usableWidth-ghostWidth/2-ghostMargin,
+                        posToTop : 0
                     });
                 } else { // middle
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostWidth,
-                    //     height   : ghostHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : false,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostWidth },
-                            height : { start: 0, end: ghostHeight },
-                            top    : { start: 0, end: 0 },
-                            left   : { start: event.pageX, end: 0 },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostWidth,
+                        height   : ghostHeight,
+                        posLeft  : event.pageX,
+                        posTop   : event.pageY,
+                        fromTo   : false,
+                        toIfExist: true,
+                        posToLeft: 0,
+                        posToTop : 0
                     });
                 }
             } else if ( event.pageX < 5 ) { // left border
@@ -904,70 +837,40 @@ function windowsDraging ( windowHead = {} ) {
                     topBottom = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY: usableHeight - ghostHeight/2-ghostMargin,
                     top = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY : 0;
                 if ( event.pageY < maximizeTop ) { // top
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostHalfWidth },
-                            height : { start: 0, end: ghostHalfHeight },
-                            top    : { start: event.pageY, end: 0 },
-                            left   : { start: event.pageX, end: 0 },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostHalfWidth,
+                        height   : ghostHalfHeight,
+                        posLeft  : event.pageX,
+                        posTop   : event.pageY,
+                        fromTo   : true,
+                        toIfExist: true,
+                        posToLeft: 0,
+                        posToTop : 0
                     });
                 } else if ( usableHeight - event.pageY < maximizeTop ) { // bottom
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : 0,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : posHalfBottom
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostHalfWidth },
-                            height : { start: 0, end: ghostHalfHeight },
-                            top    : { start: event.pageY, end: posHalfBottom },
-                            left   : { start: event.pageX, end: 0 },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostHalfWidth,
+                        height   : ghostHalfHeight,
+                        posLeft  : 0,
+                        posTop   : event.pageY,
+                        fromTo   : true,
+                        toIfExist: true,
+                        posToLeft: 0,
+                        posToTop : posHalfBottom
                     });
                 } else { // middle
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHeight,
-                    //     posStartLeft  : 0,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: 0,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostHalfWidth },
-                            height : { start: 0, end: ghostHeight },
-                            top    : { start: event.pageY, end: 0 },
-                            left   : { start: 0, end: 0 },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostHalfWidth,
+                        height   : ghostHeight,
+                        posLeft  : 0,
+                        posTop   : event.pageY,
+                        fromTo   : true,
+                        toIfExist: true,
+                        posToLeft: 0,
+                        posToTop : 0
                     });
                 }
             } else if ( event.pageX + 5 > usableWidth ) { // right border
@@ -975,70 +878,40 @@ function windowsDraging ( windowHead = {} ) {
                     top = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY : 0,
                     left = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageX : usableWidth - ghostWidth/2-ghostMargin;
                 if ( event.pageY < maximizeTop ) { // top
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: posHalfLeft,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostHalfWidth },
-                            height : { start: 0, end: ghostHalfHeight },
-                            top    : { start: event.pageY, end: 0 },
-                            left   : { start: event.pageX, end: posHalfLeft },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostHalfWidth,
+                        height   : ghostHalfHeight,
+                        posLeft  : event.pageX,
+                        posTop   : event.pageY,
+                        fromTo   : true,
+                        toIfExist: true,
+                        posToLeft: posHalfLeft,
+                        posToTop : 0
                     });
                 } else if ( usableHeight - event.pageY < maximizeTop ) { // bottom
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHalfHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: posHalfLeft,
-                    //     posEndTop : posHalfBottom
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostHalfWidth },
-                            height : { start: 0, end: ghostHalfHeight },
-                            top    : { start: event.pageY, end: posHalfBottom },
-                            left   : { start: event.pageX, end: posHalfLeft },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostHalfWidth,
+                        height   : ghostHalfHeight,
+                        posLeft  : event.pageX,
+                        posTop   : event.pageY,
+                        fromTo   : true,
+                        toIfExist: true,
+                        posToLeft: posHalfLeft,
+                        posToTop : posHalfBottom
                     });
                 } else { // middle
-                    // showGhost({
-                    //     id       : ghostWindowId,
-                    //     width    : ghostHalfWidth,
-                    //     height   : ghostHeight,
-                    //     posStartLeft  : event.pageX,
-                    //     posStartTop   : event.pageY,
-                    //     toEnd   : true,
-                    //     toIfExist: true,
-                    //     posEndLeft: posHalfLeft,
-                    //     posEndTop : 0
-                    // });
                     showGhost({
-                        id    : ghostWindowId,
-                        toEnd : true,
-                        params: {
-                            width  : { start: 0, end: ghostHalfWidth },
-                            height : { start: 0, end: ghostHeight },
-                            top    : { start: event.pageY, end: 0 },
-                            left   : { start: event.pageX, end: posHalfLeft },
-                        }
+                        id       : ghostWindowId,
+                        width    : ghostHalfWidth,
+                        height   : ghostHeight,
+                        posLeft  : event.pageX,
+                        posTop   : event.pageY,
+                        fromTo   : true,
+                        toIfExist: true,
+                        posToLeft: posHalfLeft,
+                        posToTop : 0
                     });
                 }
             } else {
@@ -1142,14 +1015,14 @@ document.onmousedown = function(event) {
             mouseDownEvent = event,
             currentWindow = event.target.closest(".window-green"),
             bordersWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
-            taskbarOverlay = document.querySelector("#taskbar-overlay"),
+            taskBarHeigth = document.getElementById("taskbar-overlay").offsetHeight,
             ghostMargin = parseInt( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') ),
             usableWidth = window.innerWidth,
             usableHeight = getUsableHeight(),
             defaultGhostW = usableWidth - ghostMargin*2,
             defaultGhostH = usableHeight - ghostMargin*2,
-            clickposStartLeft = event.x,
-            clickposStartTop = event.y,
+            clickPosLeft = event.x,
+            clickPosTop = event.y,
             windowWidth = currentWindow.offsetWidth,
             windowHeight = currentWindow.offsetHeight,
             bordersElement = currentWindow.querySelector(".window-borders"),
@@ -1159,7 +1032,7 @@ document.onmousedown = function(event) {
             shiftY = event.pageY - coords.top,
             windowBodyHeight = windowBodyElement.clientHeight - 2*parseInt(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
             windowBodyWidth = windowBodyElement.offsetWidth - 2*parseInt(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
-            taskBarHeigth = taskbarOverlay.offsetHeight,
+            taskbarOverlay = document.querySelector("#taskbar-overlay"),
             counter = 300
         ;
         document.querySelector("html").style.userSelect = 'none'; 
@@ -1178,85 +1051,33 @@ document.onmousedown = function(event) {
             if (moveY) currentWindow.style.top = event.pageY - shiftY + 'px';
         }
 
-        function changeSize( event, item ) {
-            let borderX    = item.borderX,
-                borderY    = item.borderY,
-                isPositive = item.isPositive,
-                diffX      = clickposStartLeft - event.pageX,
-                diffY      = clickposStartTop - event.pageY;
-            function changeWidth( innerWidth = usableWidth, outerWidth = usableWidth - (windowWidth - windowBodyWidth) ) {
-                currentWindow.style.width = innerWidth + 'px';
-                bordersElement.style.width = innerWidth + 'px';
-                windowBodyElement.style.width = outerWidth + 'px';
-            }
-            function changeHeight( innerHeight = usableHeight, outerHeight = usableHeight - (windowHeight - windowBodyHeight) ) {
-                currentWindow.style.height = innerHeight + 'px';
-                bordersElement.style.height = innerHeight + 'px';
-                windowBodyElement.style.height = outerHeight + 'px';
-            }
+        function changeSize( event, borderX, borderY, isPositive ) {
+            let diffX = clickPosLeft - event.pageX,
+                diffY = clickPosTop - event.pageY;
             bordersElement.style.transition = '0s';
             windowBodyElement.style.transition = '0s';
+
             
             if ( borderX && isPositive ) {
-                if ( windowWidth + diffX > usableWidth ) {
-                    changeWidth();
-                } else if ( windowWidth + diffX < 250 ) {
-                    changeWidth(250, 178);
-                } else {
-                    currentWindow.style.width = windowWidth + diffX + 'px';
-                    bordersElement.style.width = windowWidth + diffX + 'px';
-                    windowBodyElement.style.width = windowBodyWidth + diffX + 'px';
-                }
+                currentWindow.style.width = windowWidth + diffX + 'px';
+                bordersElement.style.width = windowWidth + diffX + 'px';
+                windowBodyElement.style.width = windowBodyWidth + diffX + 'px';
             } else if ( borderX && !isPositive ) {
-                if ( windowWidth - diffX > usableWidth ) {
-                    changeWidth();
-                } else if ( windowWidth - diffX < 250 ) {
-                    changeWidth(250, 178);
-                } else {
-                    currentWindow.style.width = windowWidth - diffX + 'px';
-                    bordersElement.style.width = windowWidth - diffX + 'px';
-                    windowBodyElement.style.width = windowBodyWidth - diffX + 'px';
-                }
+                currentWindow.style.width = windowWidth - diffX + 'px';
+                bordersElement.style.width = windowWidth - diffX + 'px';
+                windowBodyElement.style.width = windowBodyWidth - diffX + 'px';
             }
-
+            
             if ( borderY && isPositive ) {
-                if ( windowHeight + diffY > usableHeight ) {
-                    changeHeight();
-                } else if ( windowHeight + diffY < 250 ) {
-                    changeHeight(250, 160);
-                } else {
-                    currentWindow.style.height = windowHeight + diffY + 'px';
-                    bordersElement.style.height = windowHeight + diffY + 'px';
-                    windowBodyElement.style.height = windowBodyHeight + diffY + 'px';
-                }
+                currentWindow.style.height = windowHeight + diffY + 'px';
+                bordersElement.style.height = windowHeight + diffY + 'px';
+                windowBodyElement.style.height = windowBodyHeight + diffY + 'px';
             } else if ( borderY && !isPositive ) {
-                if ( windowHeight - diffY > usableHeight ) {
-                    changeHeight();
-                } else if ( windowHeight - diffY < 250 ) {
-                    changeHeight(250, 160);
-                } else {
-                    currentWindow.style.height = windowHeight - diffY + 'px';
-                    bordersElement.style.height = windowHeight - diffY + 'px';
-                    windowBodyElement.style.height = windowBodyHeight - diffY + 'px';
-                }
+                currentWindow.style.height = windowHeight - diffY + 'px';
+                bordersElement.style.height = windowHeight - diffY + 'px';
+                windowBodyElement.style.height = windowBodyHeight - diffY + 'px';
             }
-            if ( item.selector == '.window-border-left' && windowWidth + diffX >= usableWidth
-                || item.selector == '.window-border-top' && windowHeight + diffY >= usableHeight
-                || item.selector == '.window-border-top-left' && windowWidth + diffX >= usableWidth && windowHeight + diffY >= usableHeight
-                || item.selector == '.window-border-left' && windowWidth + diffX <= 250
-                || item.selector == '.window-border-top' && windowHeight + diffY <= 250
-                || item.selector == '.window-border-top-left' && windowWidth + diffX <= 250 && windowHeight + diffY <= 250
-                ) {
-                return;
-            } else if ( item.selector == '.window-border-top-left' && windowWidth + diffX >= usableWidth
-                        || item.selector == '.window-border-top-left' && windowWidth + diffX <= 250 ) {
-                moveAt(event, false, item.moveY);
-            } else if ( item.selector == '.window-border-top-left' && windowHeight + diffY >= usableHeight
-                        || item.selector == '.window-border-top-left' && windowHeight + diffY <= 250 ) {
-                moveAt(event, item.moveX, false);
-            } else {
-                moveAt(event, item.moveX, item.moveY);
-            }
+            
         }
 
         focusWindow(event.target.closest(".window-green"));
@@ -1264,116 +1085,79 @@ document.onmousedown = function(event) {
         // console.log();
         // console.log();
         document.onmousemove = function(event) {
-            let clickedClass = mouseDownEvent.target.classList[0],
-                windowTop = parseInt(currentWindow.style.top),
-                windowLeft = parseInt(currentWindow.style.left),
-                pxsToTaskBar = usableHeight - windowTop - currentWindow.offsetHeight,
-                windowWidth = currentWindow.offsetWidth;
+            let pxsToTaskBar = usableHeight - parseInt(currentWindow.style.top) - currentWindow.offsetHeight,
+                clickedClass = mouseDownEvent.target.classList[0];
             document.querySelector("html").style.cursor = getComputedStyle(mouseDownEvent.target).getPropertyValue('cursor');
             if ( event.pageY < 0 ) {
-                currentWindow.style.height = parseInt(currentWindow.style.height) + windowTop + 'px';
-                bordersElement.style.height = parseInt(bordersElement.style.height) + windowTop + 'px';
-                windowBodyElement.style.height = parseInt(windowBodyElement.style.height) + windowTop + 'px';
+                let windowTopMinus = parseInt(currentWindow.style.top);
+                currentWindow.style.height = parseInt(currentWindow.style.height) + windowTopMinus + 'px';
+                bordersElement.style.height = parseInt(bordersElement.style.height) + windowTopMinus + 'px';
+                windowBodyElement.style.height = parseInt(windowBodyElement.style.height) + windowTopMinus + 'px';
                 document.onmouseup();
                 currentWindow.style.top = '0px';
                 document.querySelector("html").style.userSelect = '';
                 outsideAlert('Do more', ghostWindowId);
             } else {
-                changeSize(event, item);
+                changeSize(event, item.borderX, item.borderY, item.isPositive);
+                moveAt(event, item.moveX, item.moveY);
             }
 
             // console.log(document.querySelectorAll(".ghost-window"));
 
-            if ( windowTop <= 0 && clickedClass === 'window-border-top-left' ) {
-                // top left corner
-                console.log('top left corner');
-                showGhost({
-                    id    : ghostWindowId,
-                    toEnd : true,
-                    params: {
-                        width  : { start: 0, end: windowWidth },
-                        height : { start: 0, end: defaultGhostH },
-                        top    : { start: ghostMargin },
-                        left  : {
-                            // // here is second way of this animations, just use both params
-                            // start: usableWidth - event.pageX,
-                            // end:   usableWidth - parseInt(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2
-                            start: windowLeft - 2
-                        },
-                    }
-                });
-            } else if ( windowTop <= 0 && clickedClass === 'window-border-top' ||
-                        windowTop <= 0 && clickedClass === 'window-border-top-right' 
+            if ( parseInt(currentWindow.style.top) <= 0 && clickedClass === 'window-border-top' ||
+                 parseInt(currentWindow.style.top) <= 0 && clickedClass === 'window-border-top-right' 
             ) { // top border
                 console.log('top border');
-                let end = windowLeft - 2;
-                if ( end < 0 ) end = ghostMargin;
                 showGhost({
-                    id    : ghostWindowId,
-                    toEnd : true,
-                    params: {
-                        width  : { start: 0, end: windowWidth },
-                        height : { start: 0, end: defaultGhostH },
-                        top    : { start: event.pageY, end: ghostMargin },
-                        left   : { start: event.pageX, end: end },
-                    }
+                    id       : ghostWindowId,
+                    width    : currentWindow.offsetWidth,
+                    height   : defaultGhostH,
+                    posLeft  : event.pageX,
+                    posTop   : event.pageY,
+                    fromTo   : true,
+                    toIfExist: true,
+                    posToLeft: parseInt(currentWindow.style.left) - bordersWidth - 2,
+                    posToTop : 0
                 });
             } else if ( pxsToTaskBar <= 0 && clickedClass === 'window-border-bottom' ||
                         pxsToTaskBar <= 0 && clickedClass === 'window-border-bottom-left'
             ) { // bottom border
                 console.log('bottom border');
-                let end = windowLeft - 2;
-                if ( end < 0 ) end = ghostMargin;
                 showGhost({
-                    id    : ghostWindowId,
-                    toEnd : true,
-                    params: {
-                        width  : { start: 0, end: windowWidth },
-                        height : { start: 0, end: defaultGhostH },
-                        top    : { start: event.pageY, end: ghostMargin },
-                        left   : { start: event.pageX, end: end },
-                    }
+                    id       : ghostWindowId,
+                    width    : currentWindow.offsetWidth,
+                    height   : defaultGhostH,
+                    posLeft  : event.pageX,
+                    posTop   : event.pageY,
+                    fromTo   : true,
+                    toIfExist: true,
+                    posToLeft: parseInt(currentWindow.style.left) - bordersWidth - 2,
+                    posToTop : 0
                 });
-            } else if ( pxsToTaskBar <= 0 && clickedClass === 'window-border-bottom-right' ) {
-                // bottom right corner
-                console.log('bottom right corner');
+            } else if ( pxsToTaskBar <= 0 && clickedClass === 'window-border-bottom-right' ||
+                        parseInt(currentWindow.style.left) <= 0 ) {
+                
+                // console.log(clickedClass);
+                // console.log(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--default-transition')));
                 showGhost({
-                    id    : ghostWindowId,
-                    toEnd : true,
-                    params: {
-                        width  : { start: 0, end: windowWidth },
-                        height : { start: 0, end: defaultGhostH },
-                        bottom : { start: taskBarHeigth },
-                        right  : {
-                            // // here is second way of this animations, just use both params
-                            // start: usableWidth - event.pageX,
-                            // end:   usableWidth - parseInt(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2
-                            start:   usableWidth - windowLeft - windowWidth - 2
-                        },
-                    }
+                    id       : ghostWindowId,
+                    width    : currentWindow.offsetWidth,
+                    height   : defaultGhostH,
+                    posLeft  : event.pageX,
+                    posTop   : event.pageY,
+                    fromTo   : true,
+                    toIfExist: true,
+                    posToLeft: parseInt(currentWindow.style.left) - bordersWidth - 2,
+                    posToTop : 0,
+                    instantTrans: true,
+                    counter  : parseInt(currentWindow.style.left) - bordersWidth - 2,
+                    currentWindow: currentWindow
                 });
-            } else if (
-                windowLeft < 1 && clickedClass === 'window-border-left' ||
-                windowLeft + windowWidth + 3 > usableWidth && clickedClass === 'window-border-right'
-            ) {
-                let leftOrRight = ( windowLeft < 1 && clickedClass === 'window-border-left' ) ? 'left': 'right';
-                showGhost({
-                    id    : ghostWindowId,
-                    toEnd : true,
-                    params: {
-                        width  : { start: 0, end: windowWidth - ghostMargin },
-                        height : { start: 0, end:   defaultGhostH },
-                        top    : { start: event.pageY, end:   ghostMargin },
-                        [leftOrRight] : { start: ghostMargin }, // minimizing by use string in prop
-                    }
-                });
-            } else  {
+            } else {
                 clearGhosts();
             }
 
-            // console.log(parseInt(currentWindow.style.left));
-            // console.log(currentWindow.offsetWidth);
-            // console.log(usableWidth);
+
 
 
 
@@ -1393,7 +1177,6 @@ document.onmousedown = function(event) {
             }, 10);
             document.querySelector("html").style.cursor = '';
             taskbarOverlay.style.zIndex = '';
-            cancel();
             return false;
         }
     });
