@@ -1183,6 +1183,9 @@ document.onmousedown = function(event) {
             if ( windowTop <= 0 && clickedClass === 'window-border-top-left' ) {
                 // top left corner
                 console.log('top left corner');
+                console.log(usableWidth - windowLeft);
+                let rightStart = usableWidth - windowLeft - windowWidth - 2;
+                if ( windowLeft + windowWidth >= usableWidth ) windowWidth = usableWidth - windowLeft - ghostMargin;
                 showGhost({
                     id    : ghostWindowId,
                     toEnd : true,
@@ -1191,10 +1194,6 @@ document.onmousedown = function(event) {
                         height : { start: 0, end: defaultGhostH },
                         top    : { start: ghostMargin },
                         left  : {
-                            // // here is second way of this animations, just use both params
-                            // start: usableWidth - event.pageX,
-                            // end:   usableWidth - parseInt(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2
-                            // start: event.pageX, end: windowLeft - 2
                             start: windowLeft - 2
                         },
                     }
@@ -1234,6 +1233,8 @@ document.onmousedown = function(event) {
             } else if ( pxsToTaskBar <= 0 && clickedClass === 'window-border-bottom-right' ) {
                 // bottom right corner
                 console.log('bottom right corner');
+                let rightStart = usableWidth - windowLeft - windowWidth - 2;
+                if ( windowLeft < 0 ) windowWidth += windowLeft - ghostMargin;
                 showGhost({
                     id    : ghostWindowId,
                     toEnd : true,
@@ -1245,7 +1246,7 @@ document.onmousedown = function(event) {
                             // // here is second way of this animations, just use both params
                             // start: usableWidth - event.pageX,
                             // end:   usableWidth - parseInt(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2
-                            start:   usableWidth - windowLeft - windowWidth - 2
+                            start:   rightStart
                         },
                     }
                 });
