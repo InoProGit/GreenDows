@@ -23,7 +23,7 @@
                 elm.style.left = ((Date.now() - starttime) / 4 % 600) + "px";
                 requestId = window.requestAnimationFrame(render);
                 }
-                if (parseFloat(elm.style.left) > 300) {
+                if (parseInt(elm.style.left) > 300) {
                     stop();
                 }
             }
@@ -549,14 +549,22 @@ function hideWindow ( element = undefined ) {
 
 // setting window to full screen mode
 function maximizeAction(elementHanger, event) {
-    let currentWindow = elementHanger.closest(".window-green");
-    console.log(currentWindow);
+    let window = elementHanger.closest(".window-green");
+    console.log(window);
     console.log(event.target);
-    if ( !currentWindow.classList.contains("maximized") ) {
-        maximizeWindow({currentWindow: currentWindow});
+    if ( !window.classList.contains("maximized") ) {
+        maximizeWindow({currentWindow: window});
     } else {
         minimizeWindow({
-            currentWindow: currentWindow,
+            width       : window.getAttribute('minimized-width'),
+            height      : window.getAttribute('minimized-height'),
+            left        : window.getAttribute('minimized-left'),
+            top         : window.getAttribute('minimized-top'),
+            right       : window.getAttribute('minimized-right'),
+            bottom      : window.getAttribute('minimized-bottom'),
+            bodyPaddingRight: 0,
+            bodyMargin: 0,
+            currentWindow: window,
             showBorders: true,
         });
     }
@@ -567,22 +575,21 @@ function maximizeWindow({
     currentWindow = {},
     ...rest
 }) {
-    unexpectedParams(rest);let bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
+    unexpectedParams(rest);let bordersWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
         bordersWrap = currentWindow.querySelector(".window-borders"),
         bodyElement = currentWindow.querySelector(".window-body"),
         bodyDifference = 0,
-        innerPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--inner-padding')),
-        headerHeight = parseFloat(currentWindow.querySelector(".window-top").offsetHeight),
-        width  = parseFloat(window.innerWidth),
+        innerPadding = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--inner-padding')),
+        headerHeight = parseInt(currentWindow.querySelector(".window-top").offsetHeight),
+        width  = parseInt(window.innerWidth),
         height = getUsableHeight(),
         left   = -bordersWidth,
         top    = -bordersWidth;
-    // width     += bordersWidth * 2;
-    // height    += bordersWidth + 2;
+    width     += bordersWidth * 2;
+    height    += bordersWidth + 2;
     bodyDifference =  -(bordersWidth*2);
     bordersWrap.style.opacity = 0;
 
-    currentWindow.classList.remove("minimized");
     currentWindow.classList.add("borders-hidden");
     currentWindow.classList.add("maximized");
 
@@ -590,19 +597,18 @@ function maximizeWindow({
     currentWindow.setAttribute('minimized-height', parseFloat(currentWindow.offsetHeight));
     currentWindow.setAttribute('minimized-left', parseFloat(currentWindow.style.left));
     currentWindow.setAttribute('minimized-top', parseFloat(currentWindow.style.top));
-    currentWindow.setAttribute('body-margin', parseFloat(window.getComputedStyle(bodyElement).margin));
     if (currentWindow.style.right) currentWindow.setAttribute('minimized-right', parseFloat(currentWindow.style.right));
     if (currentWindow.style.bottom) currentWindow.setAttribute('minimized-bottom', parseFloat(currentWindow.style.bottom));
 
     currentWindow.style.left   = left + 'px';
     currentWindow.style.top    = top + 'px';
-    currentWindow.style.width  = width + bordersWidth*2 + 'px';
-    currentWindow.style.height = height + bordersWidth*2 + 'px';
+    currentWindow.style.width  = width  + 'px';
+    currentWindow.style.height = height + 'px';
     bodyElement.style.width    = width - bordersWidth - innerPadding * 2 + 'px';
-    bodyElement.style.height   = height - headerHeight - innerPadding * 2 + 'px';
-    bodyElement.style.paddingBottom = innerPadding + parseFloat(document.querySelector("#taskbar-overlay").offsetHeight) + 'px';
-    bodyElement.style.margin   = '0px';
-    bodyElement.style.paddingRight = innerPadding + 'px';
+    bodyElement.style.height   = height - bordersWidth - headerHeight - innerPadding * 2 + 'px';
+    bodyElement.style.paddingBottom = innerPadding + parseInt(document.querySelector("#taskbar-overlay").offsetHeight) + 'px';
+    bodyElement.style.margin   = bodyMargin + 'px';
+    bodyElement.style.paddingRight = bodyPaddingRight + 'px';
 
     
     // console.log(currentWindow.querySelector(".window-top"));
@@ -613,55 +619,50 @@ function maximizeWindow({
 }
 
 function minimizeWindow({
+    width       = 0,
+    height      = 0,
+    left        = 0,
+    top         = 0,
+    right       = 0,
+    bottom      = 0,
+    bodyPaddingRight = 0,
+    bodyMargin = 0,
     currentWindow = {},
     useBorders  = false,
     showBorders = false,
-    removeClass = true,
     ...rest
 }) {
     unexpectedParams(rest);
-    let bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
+    let bordersWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
         bordersWrap = currentWindow.querySelector(".window-borders"),
         bodyElement = currentWindow.querySelector(".window-body"),
-        innerPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--inner-padding')),
-        headerHeight = parseFloat(currentWindow.querySelector(".window-top").offsetHeight),
-        width  = parseFloat(currentWindow.getAttribute('minimized-width')),
-        height = parseFloat(currentWindow.getAttribute('minimized-height')),
-        left   = parseFloat(currentWindow.getAttribute('minimized-left')),
-        top    = parseFloat(currentWindow.getAttribute('minimized-top')),
-        right  = parseFloat(currentWindow.getAttribute('minimized-right')),
-        bottom = parseFloat(currentWindow.getAttribute('minimized-bottom')),
-        bodyMargin = parseFloat(currentWindow.getAttribute('body-margin')),
-        mainMargin = bordersWidth,
-        bodyWidthDifference = mainMargin*2 + bodyMargin*2 + innerPadding*2,
-        bodyHeightDifference = bodyWidthDifference + bordersWidth + bodyMargin;
-    if ( !width )  width  = 250;
-    if ( !height ) height = 250;
+        bodyDifference = 0,
+        innerPadding = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--inner-padding')),
+        headerHeight = parseInt(currentWindow.querySelector(".window-top").offsetHeight);
+    if ( width === 0 )  width  = 250;
+    if ( height === 0 ) height = 250;
     if ( currentWindow.classList.contains("borders-hidden") && showBorders ) bordersWrap.style.opacity = '';
 
-    currentWindow.classList.remove("borders-hidden");
-    // if ( removeClass ) {
-        currentWindow.classList.remove("maximized");
-        currentWindow.classList.add("minimized");
-    // }
+    currentWindow.classList.remove("maximized");
+    currentWindow.classList.add("minimized");
 
-    // currentWindow.style.left   = (left && !right ) ? left   + 'px' : '';
-    // currentWindow.style.top    = (top  && !bottom) ? top    + 'px' : '';
+    currentWindow.style.left   = (left && !right ) ? left   + 'px' : '';
+    currentWindow.style.top    = (top  && !bottom) ? top    + 'px' : '';
     currentWindow.style.right  = (right)  ? right  + 'px' : '';
     currentWindow.style.bottom = (bottom) ? bottom + 'px' : '';
     currentWindow.style.width  = width  + 'px';
     currentWindow.style.height = height + 'px';
-    bodyElement.style.width    = width - bodyWidthDifference + 'px';
-    bodyElement.style.height   = height - bodyHeightDifference + 'px';
-    bodyElement.style.paddingBottom = '';
-    bodyElement.style.margin   = '';
-    bodyElement.style.paddingRight = '';
+    bodyElement.style.width    = width - bordersWidth - innerPadding * 2 + 'px';
+    bodyElement.style.height   = height - bordersWidth - headerHeight - innerPadding * 2 + 'px';
+    bodyElement.style.paddingBottom = innerPadding + parseInt(document.querySelector("#taskbar-overlay").offsetHeight) + 'px';
+    bodyElement.style.margin   = bodyMargin + 'px';
+    bodyElement.style.paddingRight = bodyPaddingRight + 'px';
 
     
-    console.log(height);
-    console.log(bodyHeightDifference);
-    console.log(bordersWidth);
-    // console.log(bodyMargin);
+    console.log(currentWindow.querySelector(".window-top"));
+    // console.log(height);
+    // console.log(getUsableHeight());
+    console.log(111);
 }
 //
 
@@ -815,7 +816,7 @@ function showGhost({
     // when ghost exist and toEnd === true
     } else if ( document.querySelector(`#ghost-window-${id}`) !== null && toEnd ) {
         let ghostWindowElement = document.querySelector('#ghost-window-'+id),
-            timeLeftToAnimate = parseFloat(ghostWindowElement.getAttribute('time-left'));
+            timeLeftToAnimate = parseInt(ghostWindowElement.getAttribute('time-left'));
         for (const key in params) {
             let value = params[key];
             if ( animationProps[key].end != params[key].end && instEnd === false ) {
@@ -855,7 +856,7 @@ function showGhost({
     if ( toEnd ) {
         animationProps = params;        
         for (const key in params) {
-            if ( parseFloat(params[key].end) >= 0 ) animateByPixel({ HTMLelement: ghostWindowElement, property: key, number: params[key].end });
+            if ( parseInt(params[key].end) >= 0 ) animateByPixel({ HTMLelement: ghostWindowElement, property: key, number: params[key].end });
         }
 
         // console.log(animationProps);
@@ -881,8 +882,7 @@ function windowsDraging ( windowHead = {} ) {
             coords = getCoords(currentWindow),
             shiftX = event.pageX - coords.left,
             shiftY = event.pageY - coords.top,
-            ghostMargin = parseFloat( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') ),
-            bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
+            ghostMargin = parseInt( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') ),
             usableWidth = window.innerWidth,
             usableHeight = getUsableHeight(),
             ghostWidth = usableWidth - ghostMargin*2,
@@ -905,21 +905,6 @@ function windowsDraging ( windowHead = {} ) {
         document.querySelector("html").style.userSelect = 'none';
         
         document.onmousemove = function(event) {
-            // hanging "using" class while window dont get reset both positions outside usable area, and minimize when one position >= 0
-            if ( parseFloat(currentWindow.style.top) >= 0 && parseFloat(currentWindow.style.left) >= 0 || parseFloat(currentWindow.style.top) >= 0 ) {
-                currentWindow.classList.remove("using");
-            }
-            if ( currentWindow.classList.contains("maximized") ){
-                if ( parseFloat(currentWindow.style.top) >= 0 || parseFloat(currentWindow.style.left) >= 0 ) {
-                    minimizeWindow({
-                        currentWindow: currentWindow,
-                        showBorders: true
-                    });
-                } else if ( parseFloat(currentWindow.style.top) < 0 && parseFloat(currentWindow.style.left) < 0 || parseFloat(currentWindow.style.top) < 0 ) {
-                    currentWindow.classList.add("using");
-                }  
-            }
-            //
             taskbarOverlay.style.zIndex = '9999';
             moveAt(event);
             // when mouse moves outside usable area
@@ -928,28 +913,26 @@ function windowsDraging ( windowHead = {} ) {
                 currentWindow.style.top = '0px';
                 outsideAlert('Do it', ghostWindowId);
             } else if ( event.pageY > innerHeight ){ // bottom when not full screen mode
-                console.log(usableHeight - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 +
+                console.log(usableHeight - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 +
                 document.querySelector(".window-head").offsetHeight + 5);
                 currentWindow.style.top = 
-                usableHeight - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 -
+                usableHeight - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 -
                 document.querySelector(".window-head").offsetHeight + 5 + 'px';
                 windowHead.onmouseup();
                 outsideAlert('Mouse outside document', ghostWindowId);
             } else if ( event.target == taskbarOverlay ) { // bottom when inside browser but hovered at taskbar
                 taskbarOverlay.style.cursor = 'pointer';
                 taskbarOverlay.onmouseup = function(event) {
-                    console.log(usableHeight - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 +
+                    console.log(usableHeight - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 +
                     document.querySelector(".window-head").offsetHeight + 5);
                     currentWindow.style.top = 
-                    usableHeight - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 -
+                    usableHeight - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 -
                     document.querySelector(".window-head").offsetHeight + 5 + 'px';
                     windowHead.onmouseup();
                 }
             }
-            // blocking showGost if window not reseted after maximize
-            if ( currentWindow.classList.contains("using") && parseFloat(currentWindow.style.top) <= bordersWidth ) return;
             // show ghost window when mouse close to outside
-            if ( parseFloat(currentWindow.style.top) <= 0 ) { // top border
+            if ( parseInt(currentWindow.style.top) <= 0 ) { // top border
                 if ( event.pageX < maximizeTop ) { // left
                     showGhost({
                         id    : ghostWindowId,
@@ -1075,8 +1058,7 @@ function windowsDraging ( windowHead = {} ) {
             }
         }
         windowHead.onmouseup = function() {
-            if ( currentWindow.classList.contains("maximized") && parseFloat(currentWindow.style.top) <= bordersWidth ) return;
-            if (parseFloat(currentWindow.style.top) < 0) currentWindow.style.top = '0px';
+            if (parseInt(currentWindow.style.top) < 0) currentWindow.style.top = '0px';
             clearGhosts();
             document.onmousemove = null;
             document.querySelector("html").style.userSelect = '';
@@ -1172,9 +1154,9 @@ document.onmousedown = function(event) {
         let item = borders[selector],
             mouseDownEvent = event,
             currentWindow = event.target.closest(".window-green"),
-            bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
+            bordersWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
             taskbarOverlay = document.querySelector("#taskbar-overlay"),
-            ghostMargin = parseFloat( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') ),
+            ghostMargin = parseInt( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') ),
             usableWidth = window.innerWidth,
             usableHeight = getUsableHeight(),
             defaultGhostW = usableWidth - ghostMargin*2,
@@ -1188,8 +1170,8 @@ document.onmousedown = function(event) {
             coords = getCoords(currentWindow),
             shiftX = event.pageX - coords.left,
             shiftY = event.pageY - coords.top,
-            windowBodyHeight = windowBodyElement.clientHeight - 2*parseFloat(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
-            windowBodyWidth = windowBodyElement.offsetWidth - 2*parseFloat(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
+            windowBodyHeight = windowBodyElement.clientHeight - 2*parseInt(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
+            windowBodyWidth = windowBodyElement.offsetWidth - 2*parseInt(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
             taskBarHeigth = taskbarOverlay.offsetHeight,
             counter = 300
         ;
@@ -1296,15 +1278,15 @@ document.onmousedown = function(event) {
         // console.log();
         document.onmousemove = function(event) {
             let clickedClass = mouseDownEvent.target.classList[0],
-                windowTop = parseFloat(currentWindow.style.top),
-                windowLeft = parseFloat(currentWindow.style.left),
+                windowTop = parseInt(currentWindow.style.top),
+                windowLeft = parseInt(currentWindow.style.left),
                 pxsToTaskBar = usableHeight - windowTop - currentWindow.offsetHeight,
                 windowWidth = currentWindow.offsetWidth;
             document.querySelector("html").style.cursor = getComputedStyle(mouseDownEvent.target).getPropertyValue('cursor');
             if ( event.pageY < 0 ) {
-                currentWindow.style.height = parseFloat(currentWindow.style.height) + windowTop + 'px';
-                bordersElement.style.height = parseFloat(bordersElement.style.height) + windowTop + 'px';
-                windowBodyElement.style.height = parseFloat(windowBodyElement.style.height) + windowTop + 'px';
+                currentWindow.style.height = parseInt(currentWindow.style.height) + windowTop + 'px';
+                bordersElement.style.height = parseInt(bordersElement.style.height) + windowTop + 'px';
+                windowBodyElement.style.height = parseInt(windowBodyElement.style.height) + windowTop + 'px';
                 document.onmouseup();
                 currentWindow.style.top = '0px';
                 document.querySelector("html").style.userSelect = '';
@@ -1380,7 +1362,7 @@ document.onmousedown = function(event) {
                         right  : {
                             // // here is second way of this animations, just use both params
                             // start: usableWidth - event.pageX,
-                            // end:   usableWidth - parseFloat(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2
+                            // end:   usableWidth - parseInt(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2
                             start:   rightStart
                         },
                     }
@@ -1404,7 +1386,7 @@ document.onmousedown = function(event) {
                 clearGhosts();
             }
 
-            // console.log(parseFloat(currentWindow.style.left));
+            // console.log(parseInt(currentWindow.style.left));
             // console.log(currentWindow.offsetWidth);
             // console.log(usableWidth);
 
@@ -1418,7 +1400,7 @@ document.onmousedown = function(event) {
             document.onmouseup = null;
             firstTarget = '';
             console.log(currentWindow.style.top);
-            if ( parseFloat(currentWindow.style.top) < 0 ) currentWindow.style.top = '0px';
+            if ( parseInt(currentWindow.style.top) < 0 ) currentWindow.style.top = '0px';
             clearGhosts();
             setTimeout(() => {
                 bordersElement.style.transition = '';
@@ -1632,14 +1614,14 @@ forEachClick( {selector: ".task-list-item",func: callWindow} );
 
 function removeMenuItem ( element = {}, menu = {} ) {
     let styles = window.getComputedStyle(element),
-        elementFullHeight = element.offsetHeight + parseFloat(styles.marginTop),
-        menuBottom = parseFloat(menu.style.bottom) + elementFullHeight - 2,
+        elementFullHeight = element.offsetHeight + parseInt(styles.marginTop),
+        menuBottom = parseInt(menu.style.bottom) + elementFullHeight - 2,
         menuTransition = menu.style.transition;
     ;
     element.style.transition = '0.75s';
     element.style.height = element.clientHeight + 'px';
     menu.style.bottom = menuBottom + 'px';
-    // menu.style.bottom = -3 - parseFloat(document.getElementById("task-list").offsetHeight) + 'px';
+    // menu.style.bottom = -3 - parseInt(document.getElementById("task-list").offsetHeight) + 'px';
 
     function animation1() {
         return new Promise(resolve => {

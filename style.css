@@ -27,6 +27,8 @@ darkGray - #272727
     
     --ghost-window-margin: 5px;
     --ghost-window-border-width: 2px;
+    
+    --inner-padding: 18px;
 }
 
 .window-borders .outside {cursor: default;}
@@ -272,15 +274,29 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     padding: 5px;
 }
 
-.window-minimize {
+.window-hide {
+    display: flex;
+    align-items: center;
+    margin-left: 7px;
+    z-index: 2;
+    cursor: pointer;
+}
+
+.hide-line {
+    width: 13px;
+    height: 2px;
+    background: black;
+}
+
+.window-maximize {
     position: relative;
     margin-left: 0.2em;
     cursor: pointer;
     z-index: 2;
-    margin-left: 0.5em;
+    margin-left: 12px;
 }
 
-.minimize-1, .minimize-2 {
+.maximize-1, .maximize-2 {
     width: 0.7em;
     height: 0.7em;
     border: 1px solid black;
@@ -288,7 +304,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     cursor: pointer;
 }
 
-.minimize-2 {
+.maximize-2 {
     position: absolute;
     top: 0.2em;
     left: -0.2em;
@@ -296,7 +312,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 .window-close {
     cursor: pointer;
-    margin: 0 8px;
+    margin: 0 8px 0 12px;
     z-index: 2;
     position: relative;
     width: 13px;
@@ -351,7 +367,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 .window-body {
     margin: 8px;
-    padding: 18px;
+    padding: var(--inner-padding);
     overflow: overlay;
     width: 500px;
     height: 500px;
