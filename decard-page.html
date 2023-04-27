@@ -8,37 +8,37 @@
     <title>Decard Autumn</title>
 </head>
 <body>
-    <div id="animated" style="position: absolute;left: 549.5px;">Hello there.</div>
+    <!-- <div id="animated" style="position: absolute;left: 549.5px;">Hello there.</div>
     <button onclick="start()">Start</button>
-    <button onclick="stop()">Stop</button>
-        <script type="text/javascript">
-            var elm = document.getElementById("animated");
-            var stopped;
-            var requestId = 0;
-            var starttime;
-    
-            function render(time) {
-                // set left style to a function of time.
-              if (!stopped) {
-                elm.style.left = ((Date.now() - starttime) / 4 % 600) + "px";
-                requestId = window.requestAnimationFrame(render);
-                }
-                if (parseFloat(elm.style.left) > 300) {
-                    stop();
-                }
+    <button onclick="stop()">Stop</button> -->
+    <script type="text/javascript">
+        var elm = document.getElementById("animated");
+        var stopped;
+        var requestId = 0;
+        var starttime;
+
+        function render(time) {
+            // set left style to a function of time.
+            if (!stopped) {
+            elm.style.left = ((Date.now() - starttime) / 4 % 600) + "px";
+            requestId = window.requestAnimationFrame(render);
             }
-    
-            function start() {
-                starttime = Date.now();
-                requestId = window.requestAnimationFrame(render);
-                stopped = false;
+            if (parseFloat(elm.style.left) > 300) {
+                stop();
             }
-            function stop() {
-                if (requestId) {
-                    window.cancelAnimationFrame(requestId);
-                }
-                stopped = true;
+        }
+
+        function start() {
+            starttime = Date.now();
+            requestId = window.requestAnimationFrame(render);
+            stopped = false;
+        }
+        function stop() {
+            if (requestId) {
+                window.cancelAnimationFrame(requestId);
             }
+            stopped = true;
+        }
     </script>
     <!-- <div id="triger">Click here</div> -->
     <div id="taskbar-wrap">
@@ -65,7 +65,6 @@
         </div>
         <div id="taskbar-overlay"></div>
     </div>
-
 <script type="text/javascript" src="menuItemsResponse.js"></script> <!-- json response whit menu data-->
 <script type="text/javascript" src="menuWindowsResponse.js"></script> <!-- json response whit windows data-->
 <script id="main-script">
@@ -442,7 +441,7 @@ function spawnHtml ( [elementHTML = '', selector = '', positionTop = 0, position
 
 // get usable html height (html - taskbar)
 function getUsableHeight () {
-    return window.innerHeight - document.querySelector("#taskbar-overlay").offsetHeight;
+    return window.innerHeight - document.querySelector("#taskbar-overlay").offsetHeight + 3;
 }
 //
 // debounce function
@@ -565,9 +564,13 @@ function maximizeAction(elementHanger, event) {
 
 function maximizeWindow({
     currentWindow = {},
+    useSizeFromGreen = false,
+    hideBorders = true,
     ...rest
 }) {
-    unexpectedParams(rest);let bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
+    unexpectedParams(rest);
+    
+    let bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
         bordersWrap = currentWindow.querySelector(".window-borders"),
         bodyElement = currentWindow.querySelector(".window-body"),
         bodyDifference = 0,
@@ -576,16 +579,11 @@ function maximizeWindow({
         width  = parseFloat(window.innerWidth),
         height = getUsableHeight(),
         left   = -bordersWidth,
-        top    = -bordersWidth;
-    // width     += bordersWidth * 2;
-    // height    += bordersWidth + 2;
-    bodyDifference =  -(bordersWidth*2);
-    bordersWrap.style.opacity = 0;
-
-    currentWindow.classList.remove("minimized");
-    currentWindow.classList.add("borders-hidden");
-    currentWindow.classList.add("maximized");
-
+        top    = -bordersWidth,
+        bodyWidth = width,
+        bodyHeight = height,
+        useFullSize = true;
+        
     currentWindow.setAttribute('minimized-width', parseFloat(currentWindow.offsetWidth));
     currentWindow.setAttribute('minimized-height', parseFloat(currentWindow.offsetHeight));
     currentWindow.setAttribute('minimized-left', parseFloat(currentWindow.style.left));
@@ -594,29 +592,60 @@ function maximizeWindow({
     if (currentWindow.style.right) currentWindow.setAttribute('minimized-right', parseFloat(currentWindow.style.right));
     if (currentWindow.style.bottom) currentWindow.setAttribute('minimized-bottom', parseFloat(currentWindow.style.bottom));
 
+    bodyDifference =  -(bordersWidth*2);
+    
+    let ghostWindowElement = (useSizeFromGreen) ? document.querySelector('#ghost-window-'+ghostWindowId) : false;
+    useFullSize = (ghostWindowElement) ? ghostWindowElement.classList.contains('use-full-size') : true;
+
+    if ( useSizeFromGreen && !useFullSize ) {
+        width  = parseFloat(ghostWindowElement.getAttribute('green-width'));
+        height = parseFloat(ghostWindowElement.getAttribute('green-height'));
+        top    = parseFloat(ghostWindowElement.getAttribute('green-top'));
+        left   = parseFloat(ghostWindowElement.getAttribute('green-left'));
+        bottom = parseFloat(ghostWindowElement.getAttribute('green-bottom'));
+        right  = parseFloat(ghostWindowElement.getAttribute('green-right'));
+
+        bordersWrap.style.transition = 'all 0s';
+        bordersWrap.style.width = width + 'px';
+        bordersWrap.style.height = height + 'px';
+        bodyWidth = width - innerPadding - 8;
+        bodyHeight = height - innerPadding - 8;
+
+    } else if ( useFullSize === true) {
+        width  += bordersWidth * 2;
+        height += bordersWidth + 2;
+        bordersWrap.style.opacity = 0;
+        bodyElement.style.paddingBottom = innerPadding + parseFloat(document.querySelector("#taskbar-overlay").offsetHeight) + 'px';
+        bodyElement.style.margin   = '0px';
+        bodyElement.style.paddingRight = innerPadding + 'px';
+
+        currentWindow.classList.add("borders-hidden");
+        currentWindow.classList.remove("minimized");
+        currentWindow.classList.add("maximized");
+    }
+
     currentWindow.style.left   = left + 'px';
     currentWindow.style.top    = top + 'px';
-    currentWindow.style.width  = width + bordersWidth*2 + 'px';
-    currentWindow.style.height = height + bordersWidth*2 + 'px';
-    bodyElement.style.width    = width - bordersWidth - innerPadding * 2 + 'px';
-    bodyElement.style.height   = height - headerHeight - innerPadding * 2 + 'px';
-    bodyElement.style.paddingBottom = innerPadding + parseFloat(document.querySelector("#taskbar-overlay").offsetHeight) + 'px';
-    bodyElement.style.margin   = '0px';
-    bodyElement.style.paddingRight = innerPadding + 'px';
+    currentWindow.style.width  = width + 'px';
+    currentWindow.style.height = height + 'px';
+    bodyElement.style.width    = bodyWidth - bordersWidth - innerPadding * 2 + 'px';
+    bodyElement.style.height   = bodyHeight - headerHeight - innerPadding * 2 + 'px';
 
+    bordersWrap.setAttribute('minimized-width', parseFloat(bordersWrap.offsetWidth));
+    bordersWrap.setAttribute('minimized-height', parseFloat(bordersWrap.offsetHeight));
     
     // console.log(currentWindow.querySelector(".window-top"));
     // console.log(height);
     // console.log(getUsableHeight());
-    console.log('maximized');
+    // console.log('currentWindow.style.top ' + top);
     
 }
 
 function minimizeWindow({
     currentWindow = {},
     useBorders  = false,
-    showBorders = false,
-    removeClass = true,
+    showBorders = true,
+    skipLeft = false,
     ...rest
 }) {
     unexpectedParams(rest);
@@ -632,23 +661,25 @@ function minimizeWindow({
         right  = parseFloat(currentWindow.getAttribute('minimized-right')),
         bottom = parseFloat(currentWindow.getAttribute('minimized-bottom')),
         bodyMargin = parseFloat(currentWindow.getAttribute('body-margin')),
+        bordersMinimizedWidth  = width,
+        bordersMinimizedHeight = height,
         mainMargin = bordersWidth,
         bodyWidthDifference = mainMargin*2 + bodyMargin*2 + innerPadding*2,
         bodyHeightDifference = bodyWidthDifference + bordersWidth + bodyMargin;
     if ( !width )  width  = 250;
     if ( !height ) height = 250;
-    if ( currentWindow.classList.contains("borders-hidden") && showBorders ) bordersWrap.style.opacity = '';
+    if ( currentWindow.classList.contains("borders-hidden") && showBorders ) {
+        bordersWrap.style.opacity = '';
+        currentWindow.classList.remove("borders-hidden");
+    }
 
-    currentWindow.classList.remove("borders-hidden");
-    // if ( removeClass ) {
-        currentWindow.classList.remove("maximized");
-        currentWindow.classList.add("minimized");
-    // }
+    currentWindow.classList.remove("maximized");
+    currentWindow.classList.add("minimized");
 
-    // currentWindow.style.left   = (left && !right ) ? left   + 'px' : '';
-    // currentWindow.style.top    = (top  && !bottom) ? top    + 'px' : '';
-    currentWindow.style.right  = (right)  ? right  + 'px' : '';
-    currentWindow.style.bottom = (bottom) ? bottom + 'px' : '';
+    if (!skipLeft) currentWindow.style.left   = (Number.isInteger(left) && !Number.isInteger(right) ) ? left   + 'px' : '';
+    currentWindow.style.top    = (Number.isInteger(top)  && !Number.isInteger(bottom)) ? top    + 'px' : '';
+    currentWindow.style.right  = (Number.isInteger(right))  ? right  + 'px' : '';
+    currentWindow.style.bottom = (Number.isInteger(bottom)) ? bottom + 'px' : '';
     currentWindow.style.width  = width  + 'px';
     currentWindow.style.height = height + 'px';
     bodyElement.style.width    = width - bodyWidthDifference + 'px';
@@ -656,11 +687,13 @@ function minimizeWindow({
     bodyElement.style.paddingBottom = '';
     bodyElement.style.margin   = '';
     bodyElement.style.paddingRight = '';
+    bordersWrap.style.width  = bordersMinimizedWidth  + 'px';
+    bordersWrap.style.height = bordersMinimizedHeight + 'px';
 
     
-    console.log(height);
-    console.log(bodyHeightDifference);
-    console.log(bordersWidth);
+    // console.log(event);
+    // console.log(bodyHeightDifference);
+    // console.log(bordersWidth);
     // console.log(bodyMargin);
 }
 //
@@ -729,7 +762,7 @@ function clearAnimationsObj() {
     for (const key in animations) {
         if (Object.hasOwnProperty.call(animations, key)) {
             const element = animations[key];
-            console.log(animations[key]);
+            // console.log(animations[key]);
             window.cancelAnimationFrame(animations[key]);
         }
     }
@@ -782,10 +815,20 @@ function showGhost({
         bottom : { start: 0, end: 0 },
         right  : { start: 0, end: 0 },
     },
+    toMaximize = {
+        width  : NaN,
+        height : NaN,
+        top    : NaN,
+        left   : NaN,
+        bottom : NaN,
+        right  : NaN,
+    },
+    classes = '',
+    classesToDelete = '',
     ...rest
 }) {
     for (const key in params) {
-        let value = params[key];
+        let value = toMaximize[key];
         if (
             key === 'width' ||
             key === 'height' ||
@@ -807,15 +850,42 @@ function showGhost({
             unexpectedParams(params);
         }
     }
+    for (const key in toMaximize) {
+        let value = params[key];
+        if ( Number.isInteger(value) || Number.isNaN(value) ) {
+            console.error(`'${key}' must be a Number or NaN.`);
+            unexpectedParams(params);
+        }
+    }
+    if ( classes !== '' ) classes = classes.replace(/[^a-zA-Z0-9-? ]/g, '');
+    if ( classesToDelete !== '' ) classesToDelete = classesToDelete.replace(/[^a-zA-Z0-9-? ]/g, '');
     unexpectedParams(rest);
+    let ghostMargin = parseFloat( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') );
+    const setSizes = (element) => {
+        // greenWidth  = (maxified.hasOwnProperty('width'))  ? maxified.width  : NaN,
+        // greenHeight = (maxified.hasOwnProperty('height')) ? maxified.height : NaN,
+        // greenLeft   = (maxified.hasOwnProperty('left'))   ? maxified.left   : NaN,
+        // greenTop    = (maxified.hasOwnProperty('top'))    ? maxified.top    : NaN,
+        // greenRight  = (maxified.hasOwnProperty('right'))  ? maxified.right  : NaN,
+        // greenBottom = (maxified.hasOwnProperty('bottom')) ? maxified.bottom : NaN;
+        element.setAttribute('green-width' , (toMaximize.hasOwnProperty('width'))  ? toMaximize.width  : NaN);
+        element.setAttribute('green-height', (toMaximize.hasOwnProperty('height')) ? toMaximize.height : NaN);
+        element.setAttribute('green-left'  , (toMaximize.hasOwnProperty('left'))   ? toMaximize.left   : NaN);
+        element.setAttribute('green-top'   , (toMaximize.hasOwnProperty('top'))    ? toMaximize.top    : NaN);
+        element.setAttribute('green-right' , (toMaximize.hasOwnProperty('right'))  ? toMaximize.right  : NaN);
+        element.setAttribute('green-bottom', (toMaximize.hasOwnProperty('bottom')) ? toMaximize.bottom : NaN);
+    };
     
     if ( document.querySelector(`#ghost-window-${id}`) !== null && !toEnd ) {
+        let ghostWindowElement = document.querySelector('#ghost-window-'+id);
+        if ( classesToDelete !== '' ) ghostWindowElement.classList.remove(classesToDelete);
         // console.log("toEnd === false; already exist");
         return;
     // when ghost exist and toEnd === true
     } else if ( document.querySelector(`#ghost-window-${id}`) !== null && toEnd ) {
         let ghostWindowElement = document.querySelector('#ghost-window-'+id),
             timeLeftToAnimate = parseFloat(ghostWindowElement.getAttribute('time-left'));
+        if ( classesToDelete !== '' ) ghostWindowElement.classList.remove(classesToDelete);
         for (const key in params) {
             let value = params[key];
             if ( animationProps[key].end != params[key].end && instEnd === false ) {
@@ -830,12 +900,13 @@ function showGhost({
                 ghostWindowElement.style[key] = params[key].end +'px';
             }
             if ( !params[key].hasOwnProperty('end') ) ghostWindowElement.style[key] = params[key].start+'px';
-        }        
+        }
+        setSizes(ghostWindowElement);
         return;
     }
     
     let ghostWindow = `
-        <div id="ghost-window-${id}" class="ghost-window"
+        <div id="ghost-window-${id}" class="ghost-window ${classes}"
             style="
                 z-index: ${currentZindex - 2};
                 left:   ${ (params.hasOwnProperty('left') && !params.hasOwnProperty('right') ) ? params.left.start : '' }px;
@@ -849,7 +920,6 @@ function showGhost({
         </div>`
     ;
     document.querySelector("body").insertAdjacentHTML('beforeEnd', ghostWindow);
-    
     let ghostWindowElement = document.querySelector('#ghost-window-'+id);
 
     if ( toEnd ) {
@@ -857,11 +927,10 @@ function showGhost({
         for (const key in params) {
             if ( parseFloat(params[key].end) >= 0 ) animateByPixel({ HTMLelement: ghostWindowElement, property: key, number: params[key].end });
         }
-
         // console.log(animationProps);
         ghostWindowElement.classList.add('first-move');
-            
     }
+    setSizes(ghostWindowElement);
 }
 
 // moving window by drug heading,
@@ -879,8 +948,8 @@ function windowsDraging ( windowHead = {} ) {
         focusWindow(event.target.closest(".window-green"));
         let mouseDownEvent = event,
             coords = getCoords(currentWindow),
-            shiftX = event.pageX - coords.left,
-            shiftY = event.pageY - coords.top,
+            inWindowX = event.pageX - coords.left,
+            inWindowY = event.pageY - coords.top,
             ghostMargin = parseFloat( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') ),
             bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
             usableWidth = window.innerWidth,
@@ -898,8 +967,8 @@ function windowsDraging ( windowHead = {} ) {
 
         ;
         function moveAt(event) {
-            currentWindow.style.left = event.pageX - shiftX + 'px';
-            currentWindow.style.top = event.pageY - shiftY + 'px';
+            currentWindow.style.left = event.pageX - inWindowX + 'px';
+            currentWindow.style.top = event.pageY - inWindowY + 'px';
         }
         currentWindow.style.zIndex = currentZindex++; // z-index priority
         document.querySelector("html").style.userSelect = 'none';
@@ -911,6 +980,21 @@ function windowsDraging ( windowHead = {} ) {
             }
             if ( currentWindow.classList.contains("maximized") ){
                 if ( parseFloat(currentWindow.style.top) >= 0 || parseFloat(currentWindow.style.left) >= 0 ) {
+                    let minimizedLeft = parseFloat(currentWindow.getAttribute('minimized-left')),
+                        minimizedWidth = parseFloat(currentWindow.getAttribute('minimized-width')),
+                        buttons = document.querySelector(".window-top-buttons"),
+                        windowTopPadding = parseFloat(getComputedStyle(currentWindow.querySelector(".window-top")).getPropertyValue('padding'));
+                        minimizedLeft = minimizedWidth/2;
+
+                    if ( event.pageX - minimizedWidth/2 < 0 ) {
+                        inWindowX -= bordersWidth;
+                        if ( event.pageX < bordersWidth + windowTopPadding + buttons.offsetWidth ) inWindowX += bordersWidth;
+                    } else if ( event.pageX + minimizedWidth/2 > usableWidth ) {
+                        inWindowX = minimizedWidth/2 + (event.pageX + minimizedWidth/2 - usableWidth);
+                        if ( event.pageX + bordersWidth > usableWidth ) inWindowX -= bordersWidth;
+                    } else {
+                        inWindowX = minimizedWidth/2;
+                    }
                     minimizeWindow({
                         currentWindow: currentWindow,
                         showBorders: true
@@ -960,7 +1044,14 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHalfHeight },
                             top    : { start: event.pageY, end: 0 },
                             left   : { start: event.pageX, end: 0 },
-                        }
+                        },
+                        toMaximize: {
+                            width  : Math.round(ghostWidth / 2),
+                            height : Math.round(ghostHeight / 2),
+                            top    : 0,
+                            left   : 0,
+                        },
+                        classesToDelete: 'use-full-size'
                     });
                 } else if ( usableWidth - event.pageX < maximizeTop ) { // right
                     showGhost({
@@ -972,8 +1063,16 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHalfHeight },
                             top    : { start: 0, end: 0 },
                             left   : { start: event.pageX, end: usableWidth-ghostWidth/2-ghostMargin },
-                        }
+                        },
+                        toMaximize: {
+                            width  : Math.round(ghostWidth / 2),
+                            height : Math.round(ghostHeight / 2),
+                            top    : 0,
+                            left   : usableWidth-ghostWidth/2-ghostMargin,
+                        },
+                        classesToDelete: 'use-full-size'
                     });
+                    console.log('top right');
                 } else { // middle
                     showGhost({
                         id    : ghostWindowId,
@@ -984,7 +1083,14 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHeight },
                             top    : { start: 0, end: 0 },
                             left   : { start: event.pageX, end: 0 },
-                        }
+                        },
+                        toMaximize: {
+                            width  : usableWidth + bordersWidth*2,
+                            height : usableHeight + bordersWidth*2,
+                            top    : -bordersWidth,
+                            left   : -bordersWidth,
+                        },
+                        classes: 'use-full-size'
                     });
                 }
             } else if ( event.pageX < 5 ) { // left border
@@ -1001,6 +1107,12 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHalfHeight },
                             top    : { start: event.pageY, end: 0 },
                             left   : { start: event.pageX, end: 0 },
+                        },
+                        toMaximize: {
+                            width  : Math.round(ghostWidth / 2),
+                            height : Math.round(ghostHeight / 2),
+                            top    : 0,
+                            left   : 0,
                         }
                     });
                 } else if ( usableHeight - event.pageY < maximizeTop ) { // bottom
@@ -1013,6 +1125,12 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHalfHeight },
                             top    : { start: event.pageY, end: posHalfBottom },
                             left   : { start: event.pageX, end: 0 },
+                        },
+                        toMaximize: {
+                            width  : Math.round(ghostWidth / 2),
+                            height : Math.round(ghostHeight / 2),
+                            top    : usableHeight - ghostHeight / 2 + 2,
+                            left   : 0,
                         }
                     });
                 } else { // middle
@@ -1025,6 +1143,12 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHeight },
                             top    : { start: event.pageY, end: 0 },
                             left   : { start: 0, end: 0 },
+                        },
+                        toMaximize: {
+                            width  : Math.round(ghostWidth / 2),
+                            height : usableHeight + 4,
+                            top    : 0,
+                            left   : 0,
                         }
                     });
                 }
@@ -1042,6 +1166,12 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHalfHeight },
                             top    : { start: event.pageY, end: 0 },
                             left   : { start: event.pageX, end: posHalfLeft },
+                        },
+                        toMaximize: {
+                            width  : Math.round(ghostWidth / 2),
+                            height : Math.round(ghostHeight / 2),
+                            top    : 0,
+                            left   : posHalfLeft,
                         }
                     });
                 } else if ( usableHeight - event.pageY < maximizeTop ) { // bottom
@@ -1055,6 +1185,12 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHalfHeight },
                             top    : { start: event.pageY, end: posHalfBottom },
                             left   : { start: event.pageX, end: posHalfLeft },
+                        },
+                        toMaximize: {
+                            width  : Math.round(ghostWidth / 2),
+                            height : Math.round(ghostHeight / 2),
+                            top    : usableHeight - ghostHeight / 2 + 2,
+                            left   : posHalfLeft,
                         }
                     });
                 } else { // middle
@@ -1067,6 +1203,12 @@ function windowsDraging ( windowHead = {} ) {
                             height : { start: 0, end: ghostHeight },
                             top    : { start: event.pageY, end: 0 },
                             left   : { start: event.pageX, end: posHalfLeft },
+                        },
+                        toMaximize: {
+                            width  : Math.round(ghostWidth / 2),
+                            height : usableHeight + 4,
+                            top    : 0,
+                            left   : posHalfLeft,
                         }
                     });
                 }
@@ -1075,15 +1217,21 @@ function windowsDraging ( windowHead = {} ) {
             }
         }
         windowHead.onmouseup = function() {
-            if ( currentWindow.classList.contains("maximized") && parseFloat(currentWindow.style.top) <= bordersWidth ) return;
-            if (parseFloat(currentWindow.style.top) < 0) currentWindow.style.top = '0px';
-            clearGhosts();
             document.onmousemove = null;
             document.querySelector("html").style.userSelect = '';
             currentWindow.onmouseup = null;
             taskbarOverlay.onmouseup = null;
             taskbarOverlay.style.zIndex = '';
             if ( taskbarOverlay.style.cursor == 'pointer' ) taskbarOverlay.style.cursor = '';
+            if ( currentWindow.classList.contains("maximized") && parseFloat(currentWindow.style.top) <= bordersWidth ) {
+                currentWindow.style.top = '-' + bordersWidth + 'px';
+                currentWindow.style.left = '-' + bordersWidth + 'px';
+                currentWindow.classList.remove("using");
+                return;
+            }
+            if (parseFloat(currentWindow.style.top) < 0) currentWindow.style.top = '0px';
+            if ( document.querySelectorAll(".ghost-window")[0] ) maximizeWindow({currentWindow: currentWindow, useSizeFromGreen: true, hideBorders: false});
+            clearGhosts();
             cancelAnimateByPixel();
         }
     }
@@ -1168,6 +1316,13 @@ document.onmousedown = function(event) {
         ) {
             return false;
         }
+    function getCoords(elem) {
+        let box = elem.getBoundingClientRect();
+        return {
+            top: box.top + pageYOffset,
+            left: box.left + pageXOffset
+        };
+    }
     // item.element.onmousedown = function(event) {
         let item = borders[selector],
             mouseDownEvent = event,
@@ -1186,27 +1341,20 @@ document.onmousedown = function(event) {
             bordersElement = currentWindow.querySelector(".window-borders"),
             windowBodyElement = currentWindow.querySelector(".window-body"),
             coords = getCoords(currentWindow),
-            shiftX = event.pageX - coords.left,
-            shiftY = event.pageY - coords.top,
+            inWindowX = event.pageX - coords.left,
+            inWindowY = event.pageY - coords.top,
             windowBodyHeight = windowBodyElement.clientHeight - 2*parseFloat(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
             windowBodyWidth = windowBodyElement.offsetWidth - 2*parseFloat(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
             taskBarHeigth = taskbarOverlay.offsetHeight,
             counter = 300
         ;
+        
         document.querySelector("html").style.userSelect = 'none'; 
         taskbarOverlay.style.zIndex = '9999';
 
-        function getCoords(elem) {
-            let box = elem.getBoundingClientRect();
-            return {
-                top: box.top + pageYOffset,
-                left: box.left + pageXOffset
-            };
-        }
-
         function moveAt( event, moveX, moveY ) {
-            if (moveX) currentWindow.style.left = event.pageX - shiftX + 'px';
-            if (moveY) currentWindow.style.top = event.pageY - shiftY + 'px';
+            if (moveX) currentWindow.style.left = event.pageX - inWindowX + 'px';
+            if (moveY) currentWindow.style.top = event.pageY - inWindowY + 'px';
         }
 
         function changeSize( event, item ) {
@@ -1249,13 +1397,12 @@ document.onmousedown = function(event) {
                     windowBodyElement.style.width = windowBodyWidth - diffX + 'px';
                 }
             }
-
             if ( borderY && isPositive ) {
-                if ( windowHeight + diffY > usableHeight ) {
+                if ( windowHeight + diffY > usableHeight  ) {
                     changeHeight();
                 } else if ( windowHeight + diffY < 250 ) {
                     changeHeight(250, 160);
-                } else {
+                } else if ( usableHeight + 100 > parseFloat(currentWindow.offsetHeight) ) {
                     currentWindow.style.height = windowHeight + diffY + 'px';
                     bordersElement.style.height = windowHeight + diffY + 'px';
                     windowBodyElement.style.height = windowBodyHeight + diffY + 'px';
@@ -1291,8 +1438,7 @@ document.onmousedown = function(event) {
         }
 
         focusWindow(event.target.closest(".window-green"));
-        currentWindow.style.zIndex = currentZindex++; // z-index priority
-        // console.log();
+        // currentWindow.style.zIndex = currentZindex++; // z-index priority
         // console.log();
         document.onmousemove = function(event) {
             let clickedClass = mouseDownEvent.target.classList[0],
@@ -1301,6 +1447,13 @@ document.onmousedown = function(event) {
                 pxsToTaskBar = usableHeight - windowTop - currentWindow.offsetHeight,
                 windowWidth = currentWindow.offsetWidth;
             document.querySelector("html").style.cursor = getComputedStyle(mouseDownEvent.target).getPropertyValue('cursor');
+            if ( event.pageY < 1 ) { // when mouse moove fast to top border, position.top cant keep up for event.pageY, this is solution
+                currentWindow.style.top = '0px';
+                currentWindow.style.height = usableHeight + 'px';
+                bordersElement.style.height = usableHeight + 'px';
+                windowBodyElement.style.height = windowBodyHeight + 'px';
+                console.log('workArea.onmouseleave !!!');
+            }
             if ( event.pageY < 0 ) {
                 currentWindow.style.height = parseFloat(currentWindow.style.height) + windowTop + 'px';
                 bordersElement.style.height = parseFloat(bordersElement.style.height) + windowTop + 'px';
@@ -1313,32 +1466,63 @@ document.onmousedown = function(event) {
                 changeSize(event, item);
             }
 
-            // console.log(document.querySelectorAll(".ghost-window"));
-
             if ( windowTop <= 0 && clickedClass === 'window-border-top-left' ) {
                 // top left corner
                 console.log('top left corner');
                 console.log(usableWidth - windowLeft);
-                let rightStart = usableWidth - windowLeft - windowWidth - 2;
+                windowLeft  = parseFloat(currentWindow.style.left);
+                windowWidth = currentWindow.offsetWidth;
+                let topObj     = { start: ghostMargin },
+                    leftObj    = { start: windowLeft - 2 },
+                    widthObj   = { start: 0, end: windowWidth },
+                    toMaxWidth = windowWidth;
+                    toMaxLeft  = windowLeft;
+                if ( windowLeft + windowWidth >= usableWidth ) windowWidth = usableWidth - windowLeft - ghostMargin;
+                if ( windowLeft <= ghostMargin ) {
+                    topObj     = { start: event.pageY, end: ghostMargin };
+                    leftObj    = { start: event.pageX, end: ghostMargin },
+                    widthObj   = { start: 0, end: windowWidth + windowLeft - ghostMargin - 2 };
+                    toMaxWidth =  windowWidth + windowLeft - ghostMargin - 2;
+                    toMaxLeft  = windowLeft;
+                }
+                showGhost({
+                    id    : ghostWindowId,
+                    toEnd : true,
+                    params: {
+                        width  : widthObj,
+                        height : { start: 0, end: defaultGhostH },
+                        top    : topObj,
+                        left   : leftObj,
+                    },
+                    toMaximize: {
+                        width  : toMaxWidth,
+                        height : usableHeight,
+                        top    : 0,
+                        left   : toMaxLeft,
+                    },
+                });
+            } else if ( windowLeft <= 0 && clickedClass === 'window-border-top-left' ) {
+                // top left corner at left side
+                console.log('top left corner on left border');
+                console.log(usableWidth - windowLeft);
+                // let rightStart = usableWidth - windowLeft - windowWidth - 2;
                 if ( windowLeft + windowWidth >= usableWidth ) windowWidth = usableWidth - windowLeft - ghostMargin;
                 showGhost({
                     id    : ghostWindowId,
                     toEnd : true,
                     params: {
-                        width  : { start: 0, end: windowWidth },
+                        width  : { start: 0, end: windowWidth + windowLeft - ghostMargin - 2 },
                         height : { start: 0, end: defaultGhostH },
-                        top    : { start: ghostMargin },
-                        left  : {
-                            start: windowLeft - 2
-                        },
+                        top    : { start: event.pageY, end: ghostMargin },
+                        left   : { start: windowLeft, end: ghostMargin },
                     }
                 });
             } else if ( windowTop <= 0 && clickedClass === 'window-border-top' ||
                         windowTop <= 0 && clickedClass === 'window-border-top-right' 
             ) { // top border
-                console.log('top border');
-                let end = windowLeft - 2;
-                if ( end < 0 ) end = ghostMargin;
+                // console.log('top border');
+                let leftEnd = windowLeft - 2;
+                if ( leftEnd < 0 ) leftEnd = ghostMargin;
                 showGhost({
                     id    : ghostWindowId,
                     toEnd : true,
@@ -1346,8 +1530,13 @@ document.onmousedown = function(event) {
                         width  : { start: 0, end: windowWidth },
                         height : { start: 0, end: defaultGhostH },
                         top    : { start: event.pageY, end: ghostMargin },
-                        left   : { start: event.pageX, end: end },
-                    }
+                        left   : { start: event.pageX, end: leftEnd },
+                    },
+                    toMaximize: {
+                        height : usableHeight,
+                        top    : 0,
+                        left   : leftEnd,
+                    },
                 });
             } else if ( pxsToTaskBar <= 0 && clickedClass === 'window-border-bottom' ||
                         pxsToTaskBar <= 0 && clickedClass === 'window-border-bottom-left'
@@ -1363,62 +1552,135 @@ document.onmousedown = function(event) {
                         height : { start: 0, end: defaultGhostH },
                         top    : { start: event.pageY, end: ghostMargin },
                         left   : { start: event.pageX, end: end },
-                    }
+                    },
+                    toMaximize: {
+                        height : usableHeight,
+                        top    : 0,
+                        left   : end,
+                    },
                 });
             } else if ( pxsToTaskBar <= 0 && clickedClass === 'window-border-bottom-right' ) {
                 // bottom right corner
                 console.log('bottom right corner');
-                let rightStart = usableWidth - windowLeft - windowWidth - 2;
+                windowLeft  = parseFloat(currentWindow.style.left);
+                windowWidth = currentWindow.offsetWidth;
+                let ghostRight = usableWidth - windowLeft - windowWidth - 2,
+                    windowOutsidePxs = usableWidth - (currentWindow.offsetWidth + parseFloat(currentWindow.style.left)),
+                    toMaxWidth = currentWindow.offsetWidth;
                 if ( windowLeft < 0 ) windowWidth += windowLeft - ghostMargin;
+                if ( usableWidth - windowLeft - windowWidth - 2 <= ghostMargin ) {
+                    toMaxWidth = currentWindow.offsetWidth + (usableWidth - (currentWindow.offsetWidth + parseFloat(currentWindow.style.left)));
+                    windowWidth = windowWidth + windowOutsidePxs - ghostMargin - 2 ;
+                    ghostRight = ghostMargin,
+                console.log(usableWidth - windowLeft - windowWidth - 2);
+                }
                 showGhost({
                     id    : ghostWindowId,
                     toEnd : true,
                     params: {
                         width  : { start: 0, end: windowWidth },
                         height : { start: 0, end: defaultGhostH },
+                        // ** this way to show ghost instantly from right border (mouse position with mooving), like it works at top right corner
                         bottom : { start: taskBarHeigth },
-                        right  : {
-                            // // here is second way of this animations, just use both params
-                            // start: usableWidth - event.pageX,
-                            // end:   usableWidth - parseFloat(currentWindow.style.left) - currentWindow.offsetWidth - bordersWidth - 2
-                            start:   rightStart
-                        },
+                        right  : { start: ghostRight },
+                        // **
+                        // // this is main way to show ghost but it showing ghost slow and only from strting mouse position
+                        // top    : {
+                        //     start: usableHeight,
+                        //     end: ghostMargin
+                        // },
+                        // left   : {
+                        //     start: parseFloat(currentWindow.style.left) + currentWindow.offsetWidth,
+                        //     end  : parseFloat(currentWindow.style.left) - 2
+                        // },
+                    },
+                    toMaximize: {
+                        width  : toMaxWidth,
+                        height : usableHeight,
+                        top    : 0
                     }
                 });
-            } else if (
-                windowLeft < 1 && clickedClass === 'window-border-left' ||
-                windowLeft + windowWidth + 3 > usableWidth && clickedClass === 'window-border-right'
-            ) {
-                let leftOrRight = ( windowLeft < 1 && clickedClass === 'window-border-left' ) ? 'left': 'right';
+            } else if ( usableWidth - (windowWidth + windowLeft) <= ghostMargin && clickedClass === 'window-border-bottom-right' ) {
+                // bottom right corner at right side
+                console.log('bottom right corner at right side');
+                windowLeft  = parseFloat(currentWindow.style.left);
+                let windowOutsidePxs = usableWidth - (currentWindow.offsetWidth + parseFloat(currentWindow.style.left)),
+                    toMaxWidth = currentWindow.offsetWidth + (usableWidth - (currentWindow.offsetWidth + parseFloat(currentWindow.style.left))),
+                    ghostBottomStart = usableHeight + taskBarHeigth - ghostMargin - 2 - (parseFloat(currentWindow.style.top) + currentWindow.offsetHeight);
+                windowWidth = windowWidth + windowOutsidePxs - ghostMargin - 2 ;
                 showGhost({
                     id    : ghostWindowId,
                     toEnd : true,
                     params: {
-                        width  : { start: 0, end: windowWidth - ghostMargin },
+                        width  : { start: 0, end: windowWidth },
+                        height : { start: 0, end: defaultGhostH },
+                        // ** this way to show ghost instantly from right border (mouse position with mooving), like it works at top right corner
+                        bottom : { start: ghostBottomStart, end: taskBarHeigth },
+                        right  : { start: ghostMargin },
+                        // **
+                        // // this is main way to show ghost but it showing ghost slow and only from strting mouse position
+                        // top    : {
+                        //     start: event.pageY - currentWindow.offsetHeight, end: usableHeight,
+                        //     end  : ghostMargin
+                        // },
+                        // left   : {
+                        //     start: parseFloat(currentWindow.style.left) + currentWindow.offsetWidth,
+                        //     end  : parseFloat(currentWindow.style.left) - 2
+                        // },
+                    },
+                    toMaximize: {
+                        width  : toMaxWidth,
+                        height : usableHeight,
+                        top    : 0
+                    }
+                });
+            } else if ( windowLeft < 1 && clickedClass === 'window-border-left' ) {
+                // left border
+                showGhost({
+                    id    : ghostWindowId,
+                    toEnd : true,
+                    params: {
+                        width  : { start: 0, end: windowWidth + windowLeft - ghostMargin - 2 },
                         height : { start: 0, end:   defaultGhostH },
                         top    : { start: event.pageY, end:   ghostMargin },
-                        [leftOrRight] : { start: ghostMargin }, // minimizing by use string in prop
+                        left   : { start: ghostMargin }, // minimizing by use string in prop
+                    },
+                    toMaximize: {
+                        width  : currentWindow.offsetWidth + parseFloat(currentWindow.style.left),
+                        height : usableHeight,
+                        top    : 0,
+                        left   : 0,
+                    }
+                });
+            } else if (  windowLeft + windowWidth + 3 > usableWidth && clickedClass === 'window-border-right' ) {
+                // right border
+                showGhost({
+                    id    : ghostWindowId,
+                    toEnd : true,
+                    params: {
+                        width  : { start: 0, end: windowWidth - ghostMargin + (usableWidth - windowWidth - windowLeft) - 2 },
+                        height : { start: 0, end: defaultGhostH },
+                        top    : { start: event.pageY, end:   ghostMargin },
+                        right  : { start: ghostMargin }, // minimizing by use string in prop
+                    },
+                    toMaximize: {
+                        width  : currentWindow.offsetWidth + (usableWidth - (currentWindow.offsetWidth + parseFloat(currentWindow.style.left))),
+                        height : usableHeight,
+                        top    : 0
                     }
                 });
             } else  {
                 clearGhosts();
             }
-
-            // console.log(parseFloat(currentWindow.style.left));
-            // console.log(currentWindow.offsetWidth);
-            // console.log(usableWidth);
-
-
-
         }
         document.onmouseup = function() {
-            console.log(1111111111);
+            // console.log(1111111111);
             if ( document.getElementById("style-to-all") ) document.getElementById("style-to-all").remove();
             document.onmousemove = null;
             document.onmouseup = null;
             firstTarget = '';
-            console.log(currentWindow.style.top);
             if ( parseFloat(currentWindow.style.top) < 0 ) currentWindow.style.top = '0px';
+            if ( document.querySelectorAll(".ghost-window")[0] ) maximizeWindow({currentWindow: currentWindow, useSizeFromGreen: true, hideBorders: false});
             clearGhosts();
             setTimeout(() => {
                 bordersElement.style.transition = '';
@@ -1557,6 +1819,7 @@ function deactivate ( selector = '' || {} ) {
 
 // doing focus on window
 function focusWindow ( element = {} , event ) {
+    // console.log('++ to window');
     let activeElement = document.querySelector(".window-green.active");
 
     if (activeElement) focusOutWindow(activeElement);
@@ -1780,16 +2043,18 @@ function prepareWindow ( windowObj = {} ) {
             <div id="${windowId}" class="${classHTML}" task-name="${taskName}" task-id="${taskId}" style="z-index: ${currentZindex++};">
                 <div class="window-main">
                     <div class="window-top">
-                        <div class="window-hide unhanged">
-                            <div class="hide-line"></div>
-                        </div>
-                        <div class="window-maximize unhanged">
-                            <div class="maximize-1"></div>
-                            <div class="maximize-2"></div>
-                        </div>
-                        <div class="window-close unhanged">
-                            <div class="close-line1"></div>
-                            <div class="close-line2"></div>
+                        <div class="window-top-buttons">
+                            <div class="window-hide unhanged">
+                                <div class="hide-line"></div>
+                            </div>
+                            <div class="window-maximize unhanged">
+                                <div class="maximize-1"></div>
+                                <div class="maximize-2"></div>
+                            </div>
+                            <div class="window-close unhanged">
+                                <div class="close-line1"></div>
+                                <div class="close-line2"></div>
+                            </div>
                         </div>
                         <div class="window-line"></div>
                     </div>
@@ -1838,9 +2103,6 @@ function spawnTask ( windowObj = {} ) {
     
 }
 //
-
-
-
 
 // functions to render page
 // forEachClick( {selector: ".window-close",func: closeWindow} );

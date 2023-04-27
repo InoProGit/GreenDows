@@ -29,6 +29,13 @@ darkGray - #272727
     --ghost-window-border-width: 2px;
     
     --inner-padding: 18px;
+
+    --small-window-width: 250px;
+    --small-window-height: 250px;
+    --medium-window-width: 500px;
+    --medium-window-heght: 500px;
+    --large-window-width: 1000px;
+    --large-window-heght: 700px;
 }
 
 .window-borders .outside {cursor: default;}
@@ -274,6 +281,10 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     padding: 5px;
 }
 
+.window-top-buttons {
+    display: flex;
+}
+
 .window-hide {
     display: flex;
     align-items: center;
@@ -380,18 +391,18 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 }
 
 .body-small {
-    width: 250px;
-    height: 250px;
+    width: var(--small-window-width);
+    height: var(--small-window-height);
 }
 
 .body-medium {
-    width: 500px;
-    height: 500px;
+    width: var(--medium-window-width);
+    height: var(--medium-window-height);
 }
 
 .body-large {
-    width: 1000px;
-    height: 750px;
+    width: var(--large-window-width);
+    height: var(--large-window-height);
 }
 
 #taskbar-wrap {
@@ -572,7 +583,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     /* width: 0;
     height: 0; */
     /* transform: scale(0); */
-    z-index: 99999999999 !important;
+    /* z-index: 99999999999 !important; */
 }
 
 .default-cursor {
