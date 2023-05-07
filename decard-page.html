@@ -263,13 +263,13 @@ function forEachClick (
              !document.querySelectorAll(selector)[0]
             ) throw new ReferenceError("U pass not String in 'selector' or it wasn't found");
         if ( func == Function || typeof func !== 'function') throw new TypeError("U didn't pass the 'func', or u pass not a Function");
-        if ( typeof needTimeOut !== 'boolean' ) throw new TypeError("U pass not Boolean in 'needTimeOut'");
-        if ( typeof secTimeOut !== 'number' ) throw new TypeError("U pass not Number in 'secTimeOut'");
+        if ( typeof needTimeOut !== 'boolean' ) throw new TypeError("Ur pass not Boolean in 'needTimeOut'");
+        if ( typeof secTimeOut !== 'number' ) throw new TypeError("Ur pass not Number in 'secTimeOut'");
         if ( secTimeOut < 0 ) throw new TypeError("Ur Number - 'secTimeOut' is lower then 0");
         if ( needTimeOut !== false && typeof selectorToBlocked !== 'string' ||
              needTimeOut !== false && selectorToBlocked === '' ||
              needTimeOut !== false && !document.querySelectorAll(selectorToBlocked)[0]
-            ) throw new ReferenceError("U pass not String in 'selectorToBlocked' or it wasn't found");
+            ) throw new ReferenceError("Ur pass not String in 'selectorToBlocked' or it wasn't found");
         unexpectedParams(rest);
 
         [].forEach.call( document.querySelectorAll(selector), function(element) {
@@ -337,8 +337,25 @@ function clickOutside ( outsideElements = [] ) {
     });
 }
 
+function clickOutsideGreenWidnow ( event = {} ) {
+    const activeElement = document.querySelector(".window-green.active");
+    if ( activeElement && !event.target.closest(".window-green") && !event.target.closest(".taskbar-item") ) {
+        focusOutWindow(activeElement);
+        deactivate('.taskbar-item.active');
+    }
+    
+    // outsideElements.forEach( function(element) {
+    //     if ( document.querySelectorAll(element.selector)[0].classList.contains("active") && !event.target.closest(element.parent) ) {
+    //         element.funCall();
+    //         console.warn('click outside element in array');
+    //     }
+    // });
+}
+
+// hanger of all mouseDown events
 document.addEventListener( 'mousedown' , function (event) {
     clickOutside(outsideElements);
+    clickOutsideGreenWidnow(event);
 });
 //
 
@@ -513,7 +530,7 @@ function closeWindow ( element = undefined ) {
 //
 
 // nidding window, set inactive menu item
-function hideWindow ( element = undefined ) {
+function hideWindow ( element = {} ) {
     let windowElement = element.closest(".window-green"),
         transition = getComputedStyle(document.documentElement).getPropertyValue('--default-transition'),
         taskId = windowElement.getAttribute('task-id'),
@@ -522,16 +539,17 @@ function hideWindow ( element = undefined ) {
         windowRect = windowElement.getBoundingClientRect()
     ;
 
-    windowElement.setAttribute('prev-top', windowElement.style.top);
-    windowElement.setAttribute('prev-left', windowElement.style.left);
+    if ( !windowElement.getAttribute('prev-top') ) windowElement.setAttribute('prev-top', windowElement.style.top);
+    if ( !windowElement.getAttribute('prev-left') ) windowElement.setAttribute('prev-left', windowElement.style.left);
     windowElement.style.transition = '1s';
     windowElement.style.top = taskBarElementRect.top + 'px';
     windowElement.style.left = taskBarElementRect.left - windowRect.width/2 + 'px';
 
     setTimeout(() => {
+        focusOutWindow(windowElement);
         elementInTaskBar.classList.remove('active');
     }, parseFloat(transition) * 1000);
-
+    // blockClicked( elementInTaskBar, parseFloat(transition) * 2000 + 10);
     // console.log(elementInTaskBar.getBoundingClientRect());
 
     // .getBoundingClientRect()
@@ -969,6 +987,8 @@ function windowsDraging ( windowHead = {} ) {
         function moveAt(event) {
             currentWindow.style.left = event.pageX - inWindowX + 'px';
             currentWindow.style.top = event.pageY - inWindowY + 'px';
+            currentWindow.setAttribute('prev-top', event.pageY - inWindowY + 'px');
+            currentWindow.setAttribute('prev-left', event.pageX - inWindowX + 'px');
         }
         currentWindow.style.zIndex = currentZindex++; // z-index priority
         document.querySelector("html").style.userSelect = 'none';
@@ -1323,8 +1343,8 @@ document.onmousedown = function(event) {
             left: box.left + pageXOffset
         };
     }
-    // item.element.onmousedown = function(event) {
-        let item = borders[selector],
+    // borderObj.element.onmousedown = function(event) {
+        let borderObj = borders[selector],
             mouseDownEvent = event,
             currentWindow = event.target.closest(".window-green"),
             bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
@@ -1355,36 +1375,61 @@ document.onmousedown = function(event) {
         function moveAt( event, moveX, moveY ) {
             if (moveX) currentWindow.style.left = event.pageX - inWindowX + 'px';
             if (moveY) currentWindow.style.top = event.pageY - inWindowY + 'px';
+            if (moveX) currentWindow.setAttribute('prev-left', event.pageX - inWindowX + 'px');
+            if (moveY) currentWindow.setAttribute('prev-top', event.pageY - inWindowY + 'px');
         }
 
-        function changeSize( event, item ) {
-            let borderX    = item.borderX,
-                borderY    = item.borderY,
-                isPositive = item.isPositive,
-                diffX      = clickposStartLeft - event.pageX,
-                diffY      = clickposStartTop - event.pageY;
-            function changeWidth( innerWidth = usableWidth, outerWidth = usableWidth - (windowWidth - windowBodyWidth) ) {
+        function changeSize( event, borderObj ) {
+            let borderX         = borderObj.borderX,
+                borderY         = borderObj.borderY,
+                isPositive      = borderObj.isPositive,
+                diffX           = clickposStartLeft - event.pageX,
+                diffY           = clickposStartTop - event.pageY;
+            function changeWidth( innerWidth = usableWidth, outerWidth = usableWidth - (windowWidth - windowBodyWidth), plusOrMinus = '' ) {
+                let headWidth    = currentWindow.querySelector(".window-head").offsetWidth,
+                    buttonsWidth = currentWindow.querySelector(".window-top-buttons").offsetWidth,
+                    title        = currentWindow.querySelector(".wh-header"),
+                    titleWidth   = title.offsetWidth,
+                    titleMargin  = title.offsetLeft;
+                    // console.log('123');
+                if ( buttonsWidth + titleWidth + titleMargin >= headWidth ) {
+                    title.style.marginLeft = buttonsWidth + 'px';
+                    console.log('123');
+                } else {
+                    title.style.marginLeft = '';
+                }
+                if ( plusOrMinus === '-' ) {
+                    innerWidth -= diffX;
+                    outerWidth -= diffX;
+                } else if ( plusOrMinus === '+' ) {
+                    innerWidth += diffX;
+                    outerWidth += diffX;
+                }
                 currentWindow.style.width = innerWidth + 'px';
                 bordersElement.style.width = innerWidth + 'px';
                 windowBodyElement.style.width = outerWidth + 'px';
             }
-            function changeHeight( innerHeight = usableHeight, outerHeight = usableHeight - (windowHeight - windowBodyHeight) ) {
+            function changeHeight( innerHeight = usableHeight, outerHeight = usableHeight - (windowHeight - windowBodyHeight), plusOrMinus = '' ) {
+                if ( plusOrMinus === '-' ) {
+                    innerHeight -= diffY;
+                    outerHeight -= diffY;
+                } else if ( plusOrMinus === '+' ) {
+                    innerHeight += diffY;
+                    outerHeight += diffY;
+                }
                 currentWindow.style.height = innerHeight + 'px';
                 bordersElement.style.height = innerHeight + 'px';
                 windowBodyElement.style.height = outerHeight + 'px';
             }
             bordersElement.style.transition = '0s';
             windowBodyElement.style.transition = '0s';
-            
             if ( borderX && isPositive ) {
                 if ( windowWidth + diffX > usableWidth ) {
                     changeWidth();
                 } else if ( windowWidth + diffX < 250 ) {
                     changeWidth(250, 178);
                 } else {
-                    currentWindow.style.width = windowWidth + diffX + 'px';
-                    bordersElement.style.width = windowWidth + diffX + 'px';
-                    windowBodyElement.style.width = windowBodyWidth + diffX + 'px';
+                    changeWidth(windowWidth, windowBodyWidth, '+');
                 }
             } else if ( borderX && !isPositive ) {
                 if ( windowWidth - diffX > usableWidth ) {
@@ -1392,48 +1437,42 @@ document.onmousedown = function(event) {
                 } else if ( windowWidth - diffX < 250 ) {
                     changeWidth(250, 178);
                 } else {
-                    currentWindow.style.width = windowWidth - diffX + 'px';
-                    bordersElement.style.width = windowWidth - diffX + 'px';
-                    windowBodyElement.style.width = windowBodyWidth - diffX + 'px';
+                    changeWidth(windowWidth, windowBodyWidth, '-');
                 }
             }
             if ( borderY && isPositive ) {
                 if ( windowHeight + diffY > usableHeight  ) {
                     changeHeight();
                 } else if ( windowHeight + diffY < 250 ) {
-                    changeHeight(250, 160);
+                    changeHeight(250, 152);
                 } else if ( usableHeight + 100 > parseFloat(currentWindow.offsetHeight) ) {
-                    currentWindow.style.height = windowHeight + diffY + 'px';
-                    bordersElement.style.height = windowHeight + diffY + 'px';
-                    windowBodyElement.style.height = windowBodyHeight + diffY + 'px';
+                    changeHeight(windowHeight, windowBodyHeight, '+');
                 }
             } else if ( borderY && !isPositive ) {
                 if ( windowHeight - diffY > usableHeight ) {
                     changeHeight();
                 } else if ( windowHeight - diffY < 250 ) {
-                    changeHeight(250, 160);
+                    changeHeight(250, 152);
                 } else {
-                    currentWindow.style.height = windowHeight - diffY + 'px';
-                    bordersElement.style.height = windowHeight - diffY + 'px';
-                    windowBodyElement.style.height = windowBodyHeight - diffY + 'px';
+                    changeHeight(windowHeight, windowBodyHeight, '-');
                 }
             }
-            if ( item.selector == '.window-border-left' && windowWidth + diffX >= usableWidth
-                || item.selector == '.window-border-top' && windowHeight + diffY >= usableHeight
-                || item.selector == '.window-border-top-left' && windowWidth + diffX >= usableWidth && windowHeight + diffY >= usableHeight
-                || item.selector == '.window-border-left' && windowWidth + diffX <= 250
-                || item.selector == '.window-border-top' && windowHeight + diffY <= 250
-                || item.selector == '.window-border-top-left' && windowWidth + diffX <= 250 && windowHeight + diffY <= 250
+            if ( borderObj.selector == '.window-border-left' && windowWidth + diffX >= usableWidth
+                || borderObj.selector == '.window-border-top' && windowHeight + diffY >= usableHeight
+                || borderObj.selector == '.window-border-top-left' && windowWidth + diffX >= usableWidth && windowHeight + diffY >= usableHeight
+                || borderObj.selector == '.window-border-left' && windowWidth + diffX <= 250
+                || borderObj.selector == '.window-border-top' && windowHeight + diffY <= 250
+                || borderObj.selector == '.window-border-top-left' && windowWidth + diffX <= 250 && windowHeight + diffY <= 250
                 ) {
                 return;
-            } else if ( item.selector == '.window-border-top-left' && windowWidth + diffX >= usableWidth
-                        || item.selector == '.window-border-top-left' && windowWidth + diffX <= 250 ) {
-                moveAt(event, false, item.moveY);
-            } else if ( item.selector == '.window-border-top-left' && windowHeight + diffY >= usableHeight
-                        || item.selector == '.window-border-top-left' && windowHeight + diffY <= 250 ) {
-                moveAt(event, item.moveX, false);
+            } else if ( borderObj.selector == '.window-border-top-left' && windowWidth + diffX >= usableWidth
+                        || borderObj.selector == '.window-border-top-left' && windowWidth + diffX <= 250 ) {
+                moveAt(event, false, borderObj.moveY);
+            } else if ( borderObj.selector == '.window-border-top-left' && windowHeight + diffY >= usableHeight
+                        || borderObj.selector == '.window-border-top-left' && windowHeight + diffY <= 250 ) {
+                moveAt(event, borderObj.moveX, false);
             } else {
-                moveAt(event, item.moveX, item.moveY);
+                moveAt(event, borderObj.moveX, borderObj.moveY);
             }
         }
 
@@ -1463,7 +1502,7 @@ document.onmousedown = function(event) {
                 document.querySelector("html").style.userSelect = '';
                 outsideAlert('Do more', ghostWindowId);
             } else {
-                changeSize(event, item);
+                changeSize(event, borderObj);
             }
 
             if ( windowTop <= 0 && clickedClass === 'window-border-top-left' ) {
@@ -1846,14 +1885,17 @@ function focusWindow ( element = {} , event ) {
 //
 
 // focusing window from click on taskbar element
-function focusWindowFromTB ( element = {} ) {
-    let window = document.querySelector(`.window-green[task-id="${element.getAttribute('task-id')}"]`);
-
-    if ( element.classList.contains("active") && window.classList.contains("active") ) {
+function clickTaskAtTaskBar ( element = {} ) {
+    let window = document.querySelector(`.window-green[task-id="${element.getAttribute('task-id')}"]`),
+        transition = getComputedStyle(document.documentElement).getPropertyValue('--default-transition');
+    if ( window.classList.contains("hidden") && !window.classList.contains("blocked") ) {
+        blockClicked(element, parseFloat(transition) * 1000 + 1);
+        showWindow(window);
+    } else if ( element.classList.contains("active") && window.classList.contains("active") && !window.classList.contains("blocked") ) {
+        blockClicked(element, parseFloat(transition) * 1000 + 1);
+        hideWindow(window);
         return false;
     }
-    
-    if ( window.classList.contains("hidden") ) showWindow(window);
     focusWindow(window);
 }
 //
@@ -2096,7 +2138,7 @@ function spawnTask ( windowObj = {} ) {
     }
         document.getElementById('taskbar-inner').insertAdjacentHTML('afterBegin', elementHTML);
     let newTask = document.querySelectorAll(".taskbar-item.unhanged")[0] ;
-        forEachClick( {selector: ".taskbar-item.unhanged",func: focusWindowFromTB} );
+        forEachClick( {selector: ".taskbar-item.unhanged",func: clickTaskAtTaskBar} );
         newTask.classList.remove("unhanged");
 
     return newTask;
@@ -2112,7 +2154,7 @@ function spawnTask ( windowObj = {} ) {
 //
 
 // // hang window focus handler on taskbar item
-// forEachClick( {selector: ".taskbar-item",func: focusWindowFromTB} );
+// forEachClick( {selector: ".taskbar-item",func: clickTaskAtTaskBar} );
 // //
 
 // spawnRadar(radarToDecard(spawnRadarVals(5)));
@@ -2132,7 +2174,7 @@ spawnMenuItems(jsonMenuItemsData);
 
 
 setTimeout(() => {
-    document.querySelectorAll(".task-list-item")[0].click();
+    document.querySelectorAll(".task-list-item")[3].click();
 }, 250);
 
 // setTimeout(() => {

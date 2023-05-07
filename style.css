@@ -153,6 +153,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     margin: var(--border-width);
     z-index: 1;
     transition: var(--fast-transition);
+    display: inline-block;
 }
 
 .window-borders {
@@ -363,6 +364,9 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 }
 
 .wh-header {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
     margin: 0 auto;
     background: var(--default-light-color);
     padding: 0 5px;
