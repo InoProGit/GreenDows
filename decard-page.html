@@ -583,7 +583,7 @@ function maximizeAction(elementHanger, event) {
 function maximizeWindow({
     currentWindow = {},
     useSizeFromGreen = false,
-    hideBorders = true,
+    useFullSize = true,
     ...rest
 }) {
     unexpectedParams(rest);
@@ -591,6 +591,7 @@ function maximizeWindow({
     let bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
         bordersWrap = currentWindow.querySelector(".window-borders"),
         bodyElement = currentWindow.querySelector(".window-body"),
+        bodyMargin = parseFloat(window.getComputedStyle(bodyElement).margin),
         bodyDifference = 0,
         innerPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--inner-padding')),
         headerHeight = parseFloat(currentWindow.querySelector(".window-top").offsetHeight),
@@ -599,14 +600,13 @@ function maximizeWindow({
         left   = -bordersWidth,
         top    = -bordersWidth,
         bodyWidth = width,
-        bodyHeight = height,
-        useFullSize = true;
+        bodyHeight = height;
         
     currentWindow.setAttribute('minimized-width', parseFloat(currentWindow.offsetWidth));
     currentWindow.setAttribute('minimized-height', parseFloat(currentWindow.offsetHeight));
     currentWindow.setAttribute('minimized-left', parseFloat(currentWindow.style.left));
     currentWindow.setAttribute('minimized-top', parseFloat(currentWindow.style.top));
-    currentWindow.setAttribute('body-margin', parseFloat(window.getComputedStyle(bodyElement).margin));
+    currentWindow.setAttribute('body-margin', bodyMargin);
     if (currentWindow.style.right) currentWindow.setAttribute('minimized-right', parseFloat(currentWindow.style.right));
     if (currentWindow.style.bottom) currentWindow.setAttribute('minimized-bottom', parseFloat(currentWindow.style.bottom));
 
@@ -623,11 +623,15 @@ function maximizeWindow({
         bottom = parseFloat(ghostWindowElement.getAttribute('green-bottom'));
         right  = parseFloat(ghostWindowElement.getAttribute('green-right'));
 
+        let ghostMargin = parseFloat( getComputedStyle(document.documentElement).getPropertyValue('--ghost-window-margin') );
+        if ( left <= ghostMargin ) left = 0;
+
         bordersWrap.style.transition = 'all 0s';
         bordersWrap.style.width = width + 'px';
         bordersWrap.style.height = height + 'px';
-        bodyWidth = width - innerPadding - 8;
-        bodyHeight = height - innerPadding - 8;
+        bodyWidth = width - innerPadding - bodyMargin;
+        bodyHeight = height - bordersWidth - bodyMargin - innerPadding;
+        console.log(1);
 
     } else if ( useFullSize === true) {
         width  += bordersWidth * 2;
@@ -652,6 +656,7 @@ function maximizeWindow({
     bordersWrap.setAttribute('minimized-width', parseFloat(bordersWrap.offsetWidth));
     bordersWrap.setAttribute('minimized-height', parseFloat(bordersWrap.offsetHeight));
     
+    mooveTitle(currentWindow);
     // console.log(currentWindow.querySelector(".window-top"));
     // console.log(height);
     // console.log(getUsableHeight());
@@ -683,7 +688,7 @@ function minimizeWindow({
         bordersMinimizedHeight = height,
         mainMargin = bordersWidth,
         bodyWidthDifference = mainMargin*2 + bodyMargin*2 + innerPadding*2,
-        bodyHeightDifference = bodyWidthDifference + bordersWidth + bodyMargin;
+        bodyHeightDifference = bodyWidthDifference + bordersWidth + bodyMargin*2;
     if ( !width )  width  = 250;
     if ( !height ) height = 250;
     if ( currentWindow.classList.contains("borders-hidden") && showBorders ) {
@@ -707,6 +712,7 @@ function minimizeWindow({
     bodyElement.style.paddingRight = '';
     bordersWrap.style.width  = bordersMinimizedWidth  + 'px';
     bordersWrap.style.height = bordersMinimizedHeight + 'px';
+    mooveTitle(currentWindow);
 
     
     // console.log(event);
@@ -1115,7 +1121,7 @@ function windowsDraging ( windowHead = {} ) {
                 }
             } else if ( event.pageX < 5 ) { // left border
                 let left = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageX : 0,
-                    topBottom = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY: usableHeight - ghostHeight/2-ghostMargin,
+                    topBottom = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY: usableHeight - ghostHeight/2 - ghostMargin,
                     top = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY : 0;
                 if ( event.pageY < maximizeTop ) { // top
                     showGhost({
@@ -1153,6 +1159,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : 0,
                         }
                     });
+                    console.log('left bottom');
                 } else { // middle
                     showGhost({
                         id    : ghostWindowId,
@@ -1166,11 +1173,12 @@ function windowsDraging ( windowHead = {} ) {
                         },
                         toMaximize: {
                             width  : Math.round(ghostWidth / 2),
-                            height : usableHeight + 4,
+                            height : usableHeight,
                             top    : 0,
                             left   : 0,
                         }
                     });
+                    console.log('left mid');
                 }
             } else if ( event.pageX + 5 > usableWidth ) { // right border
                 let topBottom = (document.querySelector(`#ghost-window-${ghostWindowId}`) == null) ? event.pageY: usableHeight - ghostHeight/2-ghostMargin,
@@ -1195,7 +1203,6 @@ function windowsDraging ( windowHead = {} ) {
                         }
                     });
                 } else if ( usableHeight - event.pageY < maximizeTop ) { // bottom
-                    // showGhost({
                     showGhost({
                         id    : ghostWindowId,
                         toEnd : true,
@@ -1226,7 +1233,7 @@ function windowsDraging ( windowHead = {} ) {
                         },
                         toMaximize: {
                             width  : Math.round(ghostWidth / 2),
-                            height : usableHeight + 4,
+                            height : usableHeight,
                             top    : 0,
                             left   : posHalfLeft,
                         }
@@ -1250,7 +1257,7 @@ function windowsDraging ( windowHead = {} ) {
                 return;
             }
             if (parseFloat(currentWindow.style.top) < 0) currentWindow.style.top = '0px';
-            if ( document.querySelectorAll(".ghost-window")[0] ) maximizeWindow({currentWindow: currentWindow, useSizeFromGreen: true, hideBorders: false});
+            if ( document.querySelectorAll(".ghost-window")[0] ) maximizeWindow({currentWindow: currentWindow, useSizeFromGreen: true, useFullSize: false});
             clearGhosts();
             cancelAnimateByPixel();
         }
@@ -1261,66 +1268,82 @@ function windowsDraging ( windowHead = {} ) {
 }
 //
 
+// 
+function mooveTitle( currentWindow = {} ) {
+    const headWidth    = currentWindow.querySelector(".window-head").offsetWidth,
+        buttonsWidth = currentWindow.querySelector(".window-top-buttons").offsetWidth,
+        title        = currentWindow.querySelector(".wh-header"),
+        titleWidth   = title.offsetWidth,
+        titleMargin  = title.offsetLeft;
+        // console.log('123');
+    if ( buttonsWidth + titleWidth + titleMargin >= headWidth ) {
+        title.style.marginLeft = buttonsWidth + 'px';
+        console.log('123');
+    } else {
+        title.style.marginLeft = '';
+    }
+}
+
 // hadler for all borders to resize
 const borders = {
-    ".window-border-top": {
-        selector: ".window-border-top",
+    "window-border-top": {
+        persClass: "window-border-top",
         borderX: false,
         borderY: true,
         moveX: false,
         moveY: true,
         isPositive: true
     },
-    ".window-border-top-right" : {
-        selector: ".window-border-top-right",
+    "window-border-top-right" : {
+        persClass: "window-border-top-right",
         borderX: false,
         borderY: true,
         moveX: false,
         moveY: true,
         isPositive: true
     },
-    ".window-border-right": {
-        selector: ".window-border-right",
+    "window-border-right": {
+        persClass: "window-border-right",
         borderX: true,
         borderY: false,
         moveX: false,
         moveY: false,
         isPositive: false
     },
-    ".window-border-bottom": {
-        selector: ".window-border-bottom",
+    "window-border-bottom": {
+        persClass: "window-border-bottom",
         borderX: false,
         borderY: true,
         moveX: false,
         moveY: false,
         isPositive: false
     },
-    ".window-border-bottom-left": {
-        selector: ".window-border-bottom-left",
+    "window-border-bottom-left": {
+        persClass: "window-border-bottom-left",
         borderX: false,
         borderY: true,
         moveX: false,
         moveY: false,
         isPositive: false
     },
-    ".window-border-left": {
-        selector: ".window-border-left",
+    "window-border-left": {
+        persClass: "window-border-left",
         borderX: true,
         borderY: false,
         moveX: true,
         moveY: false,
         isPositive: true
     },
-    ".window-border-top-left": {
-        selector: ".window-border-top-left",
+    "window-border-top-left": {
+        persClass: "window-border-top-left",
         borderX: true,
         borderY: true,
         moveX: true,
         moveY: true,
         isPositive: true
     },
-    ".window-border-bottom-right": {
-        selector: ".window-border-bottom-right",
+    "window-border-bottom-right": {
+        persClass: "window-border-bottom-right",
         borderX: true,
         borderY: true,
         moveX: false,
@@ -1330,9 +1353,9 @@ const borders = {
 };
 
 document.onmousedown = function(event) {
-    Object.keys(borders).forEach(function(selector) {
+    Object.keys(borders).forEach(function(persClass) {
         if (
-            event.target !== document.querySelector(selector)
+            !event.target.classList.contains(persClass) 
         ) {
             return false;
         }
@@ -1344,7 +1367,7 @@ document.onmousedown = function(event) {
         };
     }
     // borderObj.element.onmousedown = function(event) {
-        let borderObj = borders[selector],
+        let borderObj = borders[persClass],
             mouseDownEvent = event,
             currentWindow = event.target.closest(".window-green"),
             bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
@@ -1356,6 +1379,7 @@ document.onmousedown = function(event) {
             defaultGhostH = usableHeight - ghostMargin*2,
             clickposStartLeft = event.x,
             clickposStartTop = event.y,
+            windowStartTop = parseFloat(currentWindow.style.top),
             windowWidth = currentWindow.offsetWidth,
             windowHeight = currentWindow.offsetHeight,
             bordersElement = currentWindow.querySelector(".window-borders"),
@@ -1386,18 +1410,7 @@ document.onmousedown = function(event) {
                 diffX           = clickposStartLeft - event.pageX,
                 diffY           = clickposStartTop - event.pageY;
             function changeWidth( innerWidth = usableWidth, outerWidth = usableWidth - (windowWidth - windowBodyWidth), plusOrMinus = '' ) {
-                let headWidth    = currentWindow.querySelector(".window-head").offsetWidth,
-                    buttonsWidth = currentWindow.querySelector(".window-top-buttons").offsetWidth,
-                    title        = currentWindow.querySelector(".wh-header"),
-                    titleWidth   = title.offsetWidth,
-                    titleMargin  = title.offsetLeft;
-                    // console.log('123');
-                if ( buttonsWidth + titleWidth + titleMargin >= headWidth ) {
-                    title.style.marginLeft = buttonsWidth + 'px';
-                    console.log('123');
-                } else {
-                    title.style.marginLeft = '';
-                }
+                mooveTitle(currentWindow);
                 if ( plusOrMinus === '-' ) {
                     innerWidth -= diffX;
                     outerWidth -= diffX;
@@ -1426,7 +1439,7 @@ document.onmousedown = function(event) {
             if ( borderX && isPositive ) {
                 if ( windowWidth + diffX > usableWidth ) {
                     changeWidth();
-                } else if ( windowWidth + diffX < 250 ) {
+                } else if ( windowWidth + diffX <= 250 ) {
                     changeWidth(250, 178);
                 } else {
                     changeWidth(windowWidth, windowBodyWidth, '+');
@@ -1434,7 +1447,7 @@ document.onmousedown = function(event) {
             } else if ( borderX && !isPositive ) {
                 if ( windowWidth - diffX > usableWidth ) {
                     changeWidth();
-                } else if ( windowWidth - diffX < 250 ) {
+                } else if ( windowWidth - diffX <= 250 ) {
                     changeWidth(250, 178);
                 } else {
                     changeWidth(windowWidth, windowBodyWidth, '-');
@@ -1443,7 +1456,7 @@ document.onmousedown = function(event) {
             if ( borderY && isPositive ) {
                 if ( windowHeight + diffY > usableHeight  ) {
                     changeHeight();
-                } else if ( windowHeight + diffY < 250 ) {
+                } else if ( windowHeight + diffY <= 250 ) {
                     changeHeight(250, 152);
                 } else if ( usableHeight + 100 > parseFloat(currentWindow.offsetHeight) ) {
                     changeHeight(windowHeight, windowBodyHeight, '+');
@@ -1451,29 +1464,52 @@ document.onmousedown = function(event) {
             } else if ( borderY && !isPositive ) {
                 if ( windowHeight - diffY > usableHeight ) {
                     changeHeight();
-                } else if ( windowHeight - diffY < 250 ) {
+                } else if ( windowHeight - diffY <= 250 ) {
                     changeHeight(250, 152);
                 } else {
                     changeHeight(windowHeight, windowBodyHeight, '-');
                 }
             }
-            if ( borderObj.selector == '.window-border-left' && windowWidth + diffX >= usableWidth
-                || borderObj.selector == '.window-border-top' && windowHeight + diffY >= usableHeight
-                || borderObj.selector == '.window-border-top-left' && windowWidth + diffX >= usableWidth && windowHeight + diffY >= usableHeight
-                || borderObj.selector == '.window-border-left' && windowWidth + diffX <= 250
-                || borderObj.selector == '.window-border-top' && windowHeight + diffY <= 250
-                || borderObj.selector == '.window-border-top-left' && windowWidth + diffX <= 250 && windowHeight + diffY <= 250
-                ) {
+            // first option (non reviewed), looks readable
+            if ( borderObj.persClass == 'window-border-left' && windowWidth + diffX >= usableWidth
+              || borderObj.persClass == 'window-border-top' && windowHeight + diffY >= usableHeight
+              || borderObj.persClass == 'window-border-top-left' && windowWidth + diffX >= usableWidth && windowHeight + diffY >= usableHeight
+              || borderObj.persClass == 'window-border-left' && windowWidth + diffX <= 250
+              || borderObj.persClass == 'window-border-top' && windowHeight + diffY <= 250
+              || borderObj.persClass == 'window-border-top-left' && windowWidth + diffX <= 250 && windowHeight + diffY <= 250
+               ) {
                 return;
-            } else if ( borderObj.selector == '.window-border-top-left' && windowWidth + diffX >= usableWidth
-                        || borderObj.selector == '.window-border-top-left' && windowWidth + diffX <= 250 ) {
+            } else if ( borderObj.persClass == 'window-border-top-left' && windowWidth + diffX >= usableWidth
+                     || borderObj.persClass == 'window-border-top-left' && windowWidth + diffX <= 250 ) {
+                if ( event.pageY >= parseFloat(currentWindow.style.top) && windowHeight + diffY <= 250 ) return;
                 moveAt(event, false, borderObj.moveY);
-            } else if ( borderObj.selector == '.window-border-top-left' && windowHeight + diffY >= usableHeight
-                        || borderObj.selector == '.window-border-top-left' && windowHeight + diffY <= 250 ) {
+            } else if ( borderObj.persClass == 'window-border-top-left' && windowHeight + diffY >= usableHeight
+                     || borderObj.persClass == 'window-border-top-left' && windowHeight + diffY <= 250 ) {
                 moveAt(event, borderObj.moveX, false);
             } else {
                 moveAt(event, borderObj.moveX, borderObj.moveY);
             }
+            // second reviewed, but looks not readable. which one is better?
+            // if ( borderObj.persClass == 'window-border-left' ) {
+            //     if ( windowWidth + diffX >= usableWidth || windowWidth + diffX <= 250 ) return;
+            //     moveAt(event, borderObj.moveX, borderObj.moveY);
+            // } else if ( borderObj.persClass == 'window-border-top' ) {
+            //     if ( windowHeight + diffY >= usableHeight || windowHeight + diffY <= 250 ) return;
+            //     moveAt(event, borderObj.moveX, borderObj.moveY);
+            // } else if ( borderObj.persClass == 'window-border-top-left' ) {
+            //     if ( windowWidth + diffX >= usableWidth && windowHeight + diffY >= usableHeight || windowWidth + diffX <= 250 && windowHeight + diffY <= 250 ) {
+            //         return;
+            //     } else if ( windowWidth + diffX >= usableWidth || windowWidth + diffX <= 250 ) {
+            //         if ( event.pageY >= parseFloat(currentWindow.style.top) && windowHeight + diffY <= 250 ) return;
+            //         moveAt(event, false, borderObj.moveY);
+            //     } else if ( windowHeight + diffY >= usableHeight || windowHeight + diffY <= 250 ) {
+            //         moveAt(event, borderObj.moveX, false);
+            //     } else {
+            //         moveAt(event, borderObj.moveX, borderObj.moveY);
+            //     }
+            // } else {
+            //     moveAt(event, borderObj.moveX, borderObj.moveY);
+            // }
         }
 
         focusWindow(event.target.closest(".window-green"));
@@ -1502,9 +1538,11 @@ document.onmousedown = function(event) {
                 document.querySelector("html").style.userSelect = '';
                 outsideAlert('Do more', ghostWindowId);
             } else {
+                console.log('wtf4');
                 changeSize(event, borderObj);
             }
 
+            if ( windowStartTop < 1 ) return;
             if ( windowTop <= 0 && clickedClass === 'window-border-top-left' ) {
                 // top left corner
                 console.log('top left corner');
@@ -1554,7 +1592,13 @@ document.onmousedown = function(event) {
                         height : { start: 0, end: defaultGhostH },
                         top    : { start: event.pageY, end: ghostMargin },
                         left   : { start: windowLeft, end: ghostMargin },
-                    }
+                    },
+                    toMaximize: {
+                        width  : windowWidth + windowLeft - ghostMargin - 2,
+                        height : usableHeight,
+                        top    : 0,
+                        left   : windowLeft,
+                    },
                 });
             } else if ( windowTop <= 0 && clickedClass === 'window-border-top' ||
                         windowTop <= 0 && clickedClass === 'window-border-top-right' 
@@ -1639,7 +1683,7 @@ document.onmousedown = function(event) {
                         top    : 0
                     }
                 });
-            } else if ( usableWidth - (windowWidth + windowLeft) <= ghostMargin && clickedClass === 'window-border-bottom-right' ) {
+            } else if ( usableWidth - (windowWidth + windowLeft) <= 0 && clickedClass === 'window-border-bottom-right' ) {
                 // bottom right corner at right side
                 console.log('bottom right corner at right side');
                 windowLeft  = parseFloat(currentWindow.style.left);
@@ -1719,7 +1763,7 @@ document.onmousedown = function(event) {
             document.onmouseup = null;
             firstTarget = '';
             if ( parseFloat(currentWindow.style.top) < 0 ) currentWindow.style.top = '0px';
-            if ( document.querySelectorAll(".ghost-window")[0] ) maximizeWindow({currentWindow: currentWindow, useSizeFromGreen: true, hideBorders: false});
+            if ( document.querySelectorAll(".ghost-window")[0] ) maximizeWindow({currentWindow: currentWindow, useSizeFromGreen: true, useFullSize: false});
             clearGhosts();
             setTimeout(() => {
                 bordersElement.style.transition = '';
@@ -2028,7 +2072,7 @@ function callWindow ( element = {} ) {
 
         if (widowActive) widowActive.classList.remove("active");
         newWindow.classList.add("active");
-            
+        
         forEachClick( {selector: ".window-green.unhanged",func: focusWindow} );
         // forEachFunc(".window-green.unhanged", windowResize);
         forEachClick( {selector: ".window-close.unhanged",func: closeWindow} );
@@ -2056,6 +2100,7 @@ function callWindow ( element = {} ) {
         if ( document.querySelectorAll(".taskbar-item").length < 2 ) {
             setTimeout(() => {
                 setTasksMargin();
+                mooveTitle(newWindow);
             }, 5);
         } else {
             setTasksMargin();

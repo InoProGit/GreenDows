@@ -81,7 +81,7 @@ const jsonWindowItemsResponse = `{
       {
         "id": 4,
         "name": "Interface Solution",
-        "windowSizeClass" : "body-medium",
+        "windowSizeClass" : "body-small",
         "windowData": ${defaultRadarData}
       }
     ]
