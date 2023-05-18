@@ -565,7 +565,7 @@ function hideWindow ( element = {} ) {
 //
 
 // setting window to full screen mode
-function maximizeAction(elementHanger, event) {
+function maximizeAction (elementHanger, event) {
     let currentWindow = elementHanger.closest(".window-green");
     console.log(currentWindow);
     console.log(event.target);
@@ -580,7 +580,7 @@ function maximizeAction(elementHanger, event) {
 
 }
 
-function maximizeWindow({
+function maximizeWindow ({
     currentWindow = {},
     useSizeFromGreen = false,
     useFullSize = true,
@@ -631,7 +631,7 @@ function maximizeWindow({
         bordersWrap.style.height = height + 'px';
         bodyWidth = width - innerPadding - bodyMargin;
         bodyHeight = height - bordersWidth - bodyMargin - innerPadding;
-        console.log(1);
+        currentWindow.classList.add("maximized-not-full");
 
     } else if ( useFullSize === true) {
         width  += bordersWidth * 2;
@@ -664,7 +664,7 @@ function maximizeWindow({
     
 }
 
-function minimizeWindow({
+function minimizeWindow ({
     currentWindow = {},
     useBorders  = false,
     showBorders = true,
@@ -688,7 +688,7 @@ function minimizeWindow({
         bordersMinimizedHeight = height,
         mainMargin = bordersWidth,
         bodyWidthDifference = mainMargin*2 + bodyMargin*2 + innerPadding*2,
-        bodyHeightDifference = bodyWidthDifference + bordersWidth + bodyMargin*2;
+        bodyHeightDifference = headerHeight + bordersWidth*2 + bodyMargin*2 + innerPadding*2;
     if ( !width )  width  = 250;
     if ( !height ) height = 250;
     if ( currentWindow.classList.contains("borders-hidden") && showBorders ) {
@@ -697,6 +697,7 @@ function minimizeWindow({
     }
 
     currentWindow.classList.remove("maximized");
+    currentWindow.classList.remove("maximized-not-full");
     currentWindow.classList.add("minimized");
 
     if (!skipLeft) currentWindow.style.left   = (Number.isInteger(left) && !Number.isInteger(right) ) ? left   + 'px' : '';
@@ -753,7 +754,7 @@ function showWindow ( element = {} ) {
 let currentZindex = 5;
 
 // remove ghost window for mouseup
-function removeGhost( id = 0 ) {
+function removeGhost ( id = 0 ) {
     let selector = `#ghost-window-${id}`,
         ghost = document.querySelector(selector),
         transition = getComputedStyle(document.documentElement).getPropertyValue('--fast-transition'),
@@ -773,7 +774,7 @@ function removeGhost( id = 0 ) {
     }
 }
 //
-function clearGhosts() {
+function clearGhosts () {
     // if (document.querySelector(`#ghost-window-${ghostWindowId}`)) removeGhost(ghostWindowId);
     document.querySelectorAll(".ghost-window").forEach( item => item.remove() );
     ghostWindowId++;
@@ -782,7 +783,7 @@ function clearGhosts() {
 let animations = {},
     animationProps = {};
 
-function clearAnimationsObj() {
+function clearAnimationsObj () {
     for (const key in animations) {
         if (Object.hasOwnProperty.call(animations, key)) {
             const element = animations[key];
@@ -793,7 +794,7 @@ function clearAnimationsObj() {
     animations = {};
 }
 
-function animateByPixel({
+function animateByPixel ({
     duration = 750, // ms
     HTMLelement = {},
     property = 'width',
@@ -821,13 +822,13 @@ function animateByPixel({
     });
 }
 
-function cancelAnimateByPixel() {
+function cancelAnimateByPixel () {
     clearAnimationsObj();
     () => callback();
     return;
 }
 
-function showGhost({
+function showGhost ({
     id      = 0,
     toEnd   = false,
     instEnd = true,
@@ -957,6 +958,54 @@ function showGhost({
     setSizes(ghostWindowElement);
 }
 
+// minimum page size notification
+function minimumPageSize () {
+    const width = window.innerWidth,
+    height = window.innerHeight;
+    if ( width < 1528 || height < 500  ) {
+        if ( !document.querySelector("#chage-size") ) {
+            document.querySelector("body").insertAdjacentHTML('beforebegin', `
+            <div id="chage-size"><span>This app requries minimum 1528x500px</span></div>
+            `);
+        }
+    } else if ( document.querySelector("#chage-size") ) {
+        document.querySelector("#chage-size").remove();
+    }
+}
+//
+
+// adjust all windows when full screen on||off
+function checkWindowSize () {
+    let allWindows = document.querySelectorAll(".window-green"),
+        usableHeight = getUsableHeight(),
+        bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
+        windowHeadHeight = (document.querySelector(".window-head")) ? document.querySelector(".window-head").offsetHeight : 0;
+    allWindows.forEach(function (event) {
+        if ( event.classList.contains("maximized") ) {
+            minimizeWindow({currentWindow: event, showBorders: true});
+            maximizeWindow({currentWindow: event});
+        } else if ( event.classList.contains("maximized-not-full") && parseFloat(event.offsetHeight) !== usableHeight || parseFloat(event.offsetHeight) > usableHeight ) {
+            let currentWindow = event,bordersWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width')),
+                bodyElement = currentWindow.querySelector(".window-body"),
+                bordersWrap = currentWindow.querySelector(".window-borders"),
+                usableHeight = getUsableHeight(),
+                bodyMargin = parseFloat(window.getComputedStyle(bodyElement).margin),
+                innerPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--inner-padding')),
+                headerHeight = parseFloat(currentWindow.querySelector(".window-top").offsetHeight);
+            bordersWrap.style.height = usableHeight + 'px';
+            bodyHeight = usableHeight - bordersWidth - bodyMargin - innerPadding;
+            currentWindow.style.height = usableHeight + 'px';
+            bodyElement.style.height   = usableHeight - (headerHeight + bordersWidth*2 + bodyMargin*2 + innerPadding*2) + 'px';
+        }
+        if ( parseFloat(event.style.top) > usableHeight ) event.style.top = usableHeight - bordersWidth*2 - windowHeadHeight + 5 + 'px';
+    });
+    if (document.getElementById("task-list")) document.getElementById("task-list").style.maxHeight = getUsableHeight() - document.getElementById("open-tasks").offsetHeight + 'px';
+    minimumPageSize();
+    initializeMenu();
+}
+window.onresize = checkWindowSize;
+//
+
 // moving window by drug heading,
 let ghostWindowId = 0; // global variable for index of ghost windows
 function windowsDraging ( windowHead = {} ) {
@@ -1028,15 +1077,21 @@ function windowsDraging ( windowHead = {} ) {
                 } else if ( parseFloat(currentWindow.style.top) < 0 && parseFloat(currentWindow.style.left) < 0 || parseFloat(currentWindow.style.top) < 0 ) {
                     currentWindow.classList.add("using");
                 }  
+            } else if ( currentWindow.classList.contains("maximized-not-full") ){
+                currentWindow.classList.remove("maximized-not-full");
             }
             //
             taskbarOverlay.style.zIndex = '9999';
             moveAt(event);
             // when mouse moves outside usable area
             if ( event.pageY < 0 ){ // top
+                currentWindow.classList.add("maximize-in-full-screen");
+                outsideAlert('Do it', ghostWindowId);
                 windowHead.onmouseup();
                 currentWindow.style.top = '0px';
-                outsideAlert('Do it', ghostWindowId);
+                currentWindow.classList.remove("maximize-in-full-screen");
+                console.log(currentWindow);
+                // maximizeWindow({currentWindow: currentWindow});
             } else if ( event.pageY > innerHeight ){ // bottom when not full screen mode
                 console.log(usableHeight - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--border-width'))*2 +
                 document.querySelector(".window-head").offsetHeight + 5);
@@ -1072,7 +1127,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : { start: event.pageX, end: 0 },
                         },
                         toMaximize: {
-                            width  : Math.round(ghostWidth / 2),
+                            width  : Math.round((ghostWidth / 2) + ghostMargin),
                             height : Math.round(ghostHeight / 2),
                             top    : 0,
                             left   : 0,
@@ -1091,7 +1146,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : { start: event.pageX, end: usableWidth-ghostWidth/2-ghostMargin },
                         },
                         toMaximize: {
-                            width  : Math.round(ghostWidth / 2),
+                            width  : Math.round((ghostWidth / 2) + ghostMargin),
                             height : Math.round(ghostHeight / 2),
                             top    : 0,
                             left   : usableWidth-ghostWidth/2-ghostMargin,
@@ -1135,7 +1190,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : { start: event.pageX, end: 0 },
                         },
                         toMaximize: {
-                            width  : Math.round(ghostWidth / 2),
+                            width  : Math.round((ghostWidth / 2) + ghostMargin),
                             height : Math.round(ghostHeight / 2),
                             top    : 0,
                             left   : 0,
@@ -1153,7 +1208,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : { start: event.pageX, end: 0 },
                         },
                         toMaximize: {
-                            width  : Math.round(ghostWidth / 2),
+                            width  : Math.round((ghostWidth / 2) + ghostMargin),
                             height : Math.round(ghostHeight / 2),
                             top    : usableHeight - ghostHeight / 2 + 2,
                             left   : 0,
@@ -1172,7 +1227,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : { start: 0, end: 0 },
                         },
                         toMaximize: {
-                            width  : Math.round(ghostWidth / 2),
+                            width  : Math.round((ghostWidth / 2) + ghostMargin),
                             height : usableHeight,
                             top    : 0,
                             left   : 0,
@@ -1196,7 +1251,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : { start: event.pageX, end: posHalfLeft },
                         },
                         toMaximize: {
-                            width  : Math.round(ghostWidth / 2),
+                            width  : Math.round((ghostWidth / 2) + ghostMargin),
                             height : Math.round(ghostHeight / 2),
                             top    : 0,
                             left   : posHalfLeft,
@@ -1214,7 +1269,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : { start: event.pageX, end: posHalfLeft },
                         },
                         toMaximize: {
-                            width  : Math.round(ghostWidth / 2),
+                            width  : Math.round((ghostWidth / 2) + ghostMargin),
                             height : Math.round(ghostHeight / 2),
                             top    : usableHeight - ghostHeight / 2 + 2,
                             left   : posHalfLeft,
@@ -1232,7 +1287,7 @@ function windowsDraging ( windowHead = {} ) {
                             left   : { start: event.pageX, end: posHalfLeft },
                         },
                         toMaximize: {
-                            width  : Math.round(ghostWidth / 2),
+                            width  : Math.round((ghostWidth / 2) + ghostMargin),
                             height : usableHeight,
                             top    : 0,
                             left   : posHalfLeft,
@@ -1257,7 +1312,7 @@ function windowsDraging ( windowHead = {} ) {
                 return;
             }
             if (parseFloat(currentWindow.style.top) < 0) currentWindow.style.top = '0px';
-            if ( document.querySelectorAll(".ghost-window")[0] ) maximizeWindow({currentWindow: currentWindow, useSizeFromGreen: true, useFullSize: false});
+            if ( document.querySelectorAll(".ghost-window")[0] && !currentWindow.classList.contains("maximize-in-full-screen") ) maximizeWindow({currentWindow: currentWindow, useSizeFromGreen: true, useFullSize: false});
             clearGhosts();
             cancelAnimateByPixel();
         }
@@ -1278,7 +1333,6 @@ function mooveTitle( currentWindow = {} ) {
         // console.log('123');
     if ( buttonsWidth + titleWidth + titleMargin >= headWidth ) {
         title.style.marginLeft = buttonsWidth + 'px';
-        console.log('123');
     } else {
         title.style.marginLeft = '';
     }
@@ -1377,9 +1431,12 @@ document.onmousedown = function(event) {
             usableHeight = getUsableHeight(),
             defaultGhostW = usableWidth - ghostMargin*2,
             defaultGhostH = usableHeight - ghostMargin*2,
-            clickposStartLeft = event.x,
             clickposStartTop = event.y,
+            clickposStartLeft = event.x,
             windowStartTop = parseFloat(currentWindow.style.top),
+            windowStartLeft = parseFloat(currentWindow.style.left),
+            posInWindowY = clickposStartTop - windowStartTop,
+            posInWindowX = clickposStartLeft - windowStartLeft,
             windowWidth = currentWindow.offsetWidth,
             windowHeight = currentWindow.offsetHeight,
             bordersElement = currentWindow.querySelector(".window-borders"),
@@ -1390,7 +1447,9 @@ document.onmousedown = function(event) {
             windowBodyHeight = windowBodyElement.clientHeight - 2*parseFloat(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
             windowBodyWidth = windowBodyElement.offsetWidth - 2*parseFloat(getComputedStyle(windowBodyElement).getPropertyValue('padding')),
             taskBarHeigth = taskbarOverlay.offsetHeight,
-            counter = 300
+            counter = 300,
+            posLeftMinWidth = windowStartLeft + (windowWidth - 250),
+            posTopMinWidth = windowStartTop + (windowHeight - 250)
         ;
         
         document.querySelector("html").style.userSelect = 'none'; 
@@ -1436,40 +1495,7 @@ document.onmousedown = function(event) {
             }
             bordersElement.style.transition = '0s';
             windowBodyElement.style.transition = '0s';
-            if ( borderX && isPositive ) {
-                if ( windowWidth + diffX > usableWidth ) {
-                    changeWidth();
-                } else if ( windowWidth + diffX <= 250 ) {
-                    changeWidth(250, 178);
-                } else {
-                    changeWidth(windowWidth, windowBodyWidth, '+');
-                }
-            } else if ( borderX && !isPositive ) {
-                if ( windowWidth - diffX > usableWidth ) {
-                    changeWidth();
-                } else if ( windowWidth - diffX <= 250 ) {
-                    changeWidth(250, 178);
-                } else {
-                    changeWidth(windowWidth, windowBodyWidth, '-');
-                }
-            }
-            if ( borderY && isPositive ) {
-                if ( windowHeight + diffY > usableHeight  ) {
-                    changeHeight();
-                } else if ( windowHeight + diffY <= 250 ) {
-                    changeHeight(250, 152);
-                } else if ( usableHeight + 100 > parseFloat(currentWindow.offsetHeight) ) {
-                    changeHeight(windowHeight, windowBodyHeight, '+');
-                }
-            } else if ( borderY && !isPositive ) {
-                if ( windowHeight - diffY > usableHeight ) {
-                    changeHeight();
-                } else if ( windowHeight - diffY <= 250 ) {
-                    changeHeight(250, 152);
-                } else {
-                    changeHeight(windowHeight, windowBodyHeight, '-');
-                }
-            }
+            
             // first option (non reviewed), looks readable
             if ( borderObj.persClass == 'window-border-left' && windowWidth + diffX >= usableWidth
               || borderObj.persClass == 'window-border-top' && windowHeight + diffY >= usableHeight
@@ -1483,9 +1509,11 @@ document.onmousedown = function(event) {
                      || borderObj.persClass == 'window-border-top-left' && windowWidth + diffX <= 250 ) {
                 if ( event.pageY >= parseFloat(currentWindow.style.top) && windowHeight + diffY <= 250 ) return;
                 moveAt(event, false, borderObj.moveY);
+                if ( windowWidth + diffX < usableWidth ) currentWindow.style.left = posLeftMinWidth + 'px';
             } else if ( borderObj.persClass == 'window-border-top-left' && windowHeight + diffY >= usableHeight
                      || borderObj.persClass == 'window-border-top-left' && windowHeight + diffY <= 250 ) {
                 moveAt(event, borderObj.moveX, false);
+                if ( windowHeight + diffY < usableHeight ) currentWindow.style.top = posTopMinWidth + 'px';
             } else {
                 moveAt(event, borderObj.moveX, borderObj.moveY);
             }
@@ -1510,6 +1538,44 @@ document.onmousedown = function(event) {
             // } else {
             //     moveAt(event, borderObj.moveX, borderObj.moveY);
             // }
+            if ( borderX && isPositive ) {
+                if ( windowWidth + diffX > usableWidth ) {
+                    changeWidth();
+                } else if ( windowWidth + diffX <= 250 ) {
+                    changeWidth(250, 178);
+                console.log('2');
+                } else {
+                    changeWidth(windowWidth, windowBodyWidth, '+');
+                }
+            } else if ( borderX && !isPositive ) {
+                if ( windowWidth - diffX > usableWidth ) {
+                    changeWidth();
+                console.log('1');
+                } else if ( windowWidth - diffX <= 250 ) {
+                    changeWidth(250, 178);
+                console.log('2');
+                } else {
+                    changeWidth(windowWidth, windowBodyWidth, '-');
+                console.log('3');
+                }
+            }
+            if ( borderY && isPositive ) {
+                if ( windowHeight + diffY > usableHeight  ) {
+                    changeHeight();
+                } else if ( windowHeight + diffY <= 250 ) {
+                    changeHeight(250, 152);
+                } else if ( usableHeight + 100 > parseFloat(currentWindow.offsetHeight) ) {
+                    changeHeight(windowHeight, windowBodyHeight, '+');
+                }
+            } else if ( borderY && !isPositive ) {
+                if ( windowHeight - diffY > usableHeight ) {
+                    changeHeight();
+                } else if ( windowHeight - diffY <= 250 ) {
+                    changeHeight(250, 152);
+                } else {
+                    changeHeight(windowHeight, windowBodyHeight, '-');
+                }
+            }
         }
 
         focusWindow(event.target.closest(".window-green"));
@@ -1522,7 +1588,7 @@ document.onmousedown = function(event) {
                 pxsToTaskBar = usableHeight - windowTop - currentWindow.offsetHeight,
                 windowWidth = currentWindow.offsetWidth;
             document.querySelector("html").style.cursor = getComputedStyle(mouseDownEvent.target).getPropertyValue('cursor');
-            if ( event.pageY < 1 ) { // when mouse moove fast to top border, position.top cant keep up for event.pageY, this is solution
+            if ( event.pageY < 1 && currentWindow.offsetHeight > 250 && currentWindow.offsetHeight >= usableHeight ) { // when mouse moove fast to top border, position.top cant keep up for event.pageY, this is solution
                 currentWindow.style.top = '0px';
                 currentWindow.style.height = usableHeight + 'px';
                 bordersElement.style.height = usableHeight + 'px';
@@ -1538,11 +1604,10 @@ document.onmousedown = function(event) {
                 document.querySelector("html").style.userSelect = '';
                 outsideAlert('Do more', ghostWindowId);
             } else {
-                console.log('wtf4');
                 changeSize(event, borderObj);
             }
 
-            if ( windowStartTop < 1 ) return;
+            if ( windowStartTop < 1 && currentWindow.classList.contains("maximized-not-full") ) return;
             if ( windowTop <= 0 && clickedClass === 'window-border-top-left' ) {
                 // top left corner
                 console.log('top left corner');
@@ -2100,11 +2165,11 @@ function callWindow ( element = {} ) {
         if ( document.querySelectorAll(".taskbar-item").length < 2 ) {
             setTimeout(() => {
                 setTasksMargin();
-                mooveTitle(newWindow);
             }, 5);
         } else {
             setTasksMargin();
         }
+        mooveTitle(newWindow);
 
 }
 //
@@ -2206,10 +2271,7 @@ function spawnTask ( windowObj = {} ) {
 
 spawnMenuItems(jsonMenuItemsData);
 
-// setTasksMargin();
-//
-
-
+checkWindowSize();
 
 
 

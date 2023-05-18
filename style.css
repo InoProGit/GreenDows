@@ -445,6 +445,7 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 }
 
 #task-list {
+    overflow-y: auto;
     /* border: 2px solid; */
     background: black;
     padding: 5px;
@@ -652,8 +653,21 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
     margin: 0 !important;
 }
 
+#chage-size {
+    position: absolute;
+    width: 101%;
+    height: 101%;
+    background: black;
+    z-index: 9999999;
+    text-align: center;
+}
 
-
+#chage-size span {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+}
 
 
 
