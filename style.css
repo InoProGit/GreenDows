@@ -116,6 +116,45 @@ html {
 a {
     color: var(--default-light-color);
 }
+
+button, .button {
+    transition: var(--fast-transition);
+    border: 4px solid green;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 1rem;
+    margin: 10px 0;
+    background: black;
+    color: var(--default-light-color);
+    cursor: pointer;
+    font-weight: bold;
+    display: inline-block;
+}
+
+button:hover, .button:hover {
+    background: var(--default-light-color);
+    color: black;
+    border: 4px solid var(--default-dark-color);
+}
+
+#matrix-notice-wrap {
+    display: flex;
+    padding: 1rem;
+}
+#matrix-notice {
+    opacity: 0;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid green;
+    display: inline-block;
+    /* height: 22px; */
+    margin: auto;
+}
+
+#matrix-notice.active {
+    opacity: 1;
+}
+
 table {
     border-spacing: 0px;
     border-collapse: collapse;
@@ -127,7 +166,7 @@ td {
     text-align: center;
     cursor: pointer;
     border: 1px solid var(--default-background);
-    width: 4em;
+    min-width: 4em;
     height: 4em;
 }
 
@@ -143,8 +182,8 @@ tr:nth-child(2n+1)  td:nth-child(2n+1), tr:nth-child(2n)  td:nth-child(2n) {
 
 .clicked {
     z-index: 2;
-    outline: 3px solid red;
-    background-color: cornflowerblue !important;
+    outline: 3px solid var(--default-light-color);
+    font-weight: bold;
 }
 
 .window-main {
