@@ -215,7 +215,7 @@ const interfaceSolutionData = JSON.stringify(``);
 const jsonWindowItemsResponse = `{
        "1" : {
         "id": 1,
-        "name": "Taskk",
+        "name": "Task",
         "windowSizeClass" : "body-small",
         "windowBodyStyles": "",
         "windowData": ${tasksWindowData},
@@ -223,24 +223,23 @@ const jsonWindowItemsResponse = `{
       },
        "2" : {
         "id": 2,
-        "name": "Default Radar",
-        "windowSizeClass" : "body-small window-radar",
-        "windowBodyStyles": "width: 380px; height: 380px;",
-        "individualStyles": [ "tr {display: flex; align-items: center;}" ],
-        "windowData": ${defaultRadarData},
-        "functionsToInit": ["initRadar"]
-      },
-       "3" : {
-        "id": 3,
         "name": "Task solution",
         "windowSizeClass" : "body-medium",
         "windowData": ${taskSolutionData},
         "functionsToInit": ["initHighlitedText"]
       },
+       "3" : {
+        "id": 3,
+        "name": "Task 2",
+        "windowBodyStyles": "",
+        "windowData": ${tasksWindowData},
+        "functionsToInit": ["initFormMatrixSubmit"]
+      },
        "4" : {
         "id": 4,
-        "name": "Interface Solution",
-        "windowSizeClass" : "body-small",
-        "windowData": ${defaultRadarData}
+        "name": "Another app",
+        "windowBodyStyles": "",
+        "windowData": ${tasksWindowData},
+        "functionsToInit": ["initFormMatrixSubmit"]
       }
 }`;

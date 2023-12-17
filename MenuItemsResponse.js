@@ -1,18 +1,18 @@
 const jsonMenuItemsResponse = `{
         "1" : {
             "id" : "1",
-            "name" : "Taskk"
+            "name" : "Task"
         },
         "2" : {
             "id" : "2",
-            "name" : "Default Radar"
+            "name" : "Task solution"
         },
         "3" : {
             "id" : "3",
-            "name" : "Task solution"
+            "name" : "Task 2"
         },
         "4" : {
             "id" : "4",
-            "name" : "Interface Solution"
+            "name" : "Another app"
         }
 }`;

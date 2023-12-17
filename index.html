@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Decard Autumn</title>
+</head>
+<body>
+    <!-- <div id="animated" style="position: absolute;left: 549.5px;">Hello there.</div>
+    <button onclick="start()">Start</button>
+    <button onclick="stop()">Stop</button> -->
+    <script type="text/javascript">
+        var elm = document.getElementById("animated");
+        var stopped;
+        var requestId = 0;
+        var starttime;
+
+        function render(time) {
+            // set left style to a function of time.
+            if (!stopped) {
+            elm.style.left = ((Date.now() - starttime) / 4 % 600) + "px";
+            requestId = window.requestAnimationFrame(render);
+            }
+            if (parseFloat(elm.style.left) > 300) {
+                stop();
+            }
+        }
+
+        function start() {
+            starttime = Date.now();
+            requestId = window.requestAnimationFrame(render);
+            stopped = false;
+        }
+        function stop() {
+            if (requestId) {
+                window.cancelAnimationFrame(requestId);
+            }
+            stopped = true;
+        }
+    </script>
+    <!-- <div id="triger">Click here</div> -->
+    <div id="taskbar-wrap">
+        <div id="menu-wrap">
+            <div id="open-tasks">
+                <div id="button-toggle">
+                    <div id="open-menu">Open</div>
+                    <div id="close-menu" style="height: 0px;">Close</div>
+                </div>
+                <div class="menu-text">menu</div>
+            </div>
+        <ul id="task-list">
+            
+        </ul>
+
+        </div>
+        
+        <div id="taskbar">
+            <div id="taskbar-inner">
+                <div class="taskbar-item-empty">
+                    This is a taskbar, open menu and start your task...
+                </div>
+            </div>
+        </div>
+        <div id="taskbar-overlay"></div>
+    </div>
+<script type="text/javascript" src="menuItemsResponse.js"></script> <!-- json response with menu data -->
+<script type="text/javascript" src="menuWindowsResponse.js"></script> <!-- json response with windows data -->
+<script type="text/javascript" src="interface.js"></script> <!-- radar -->
+<script type="text/javascript" src="radar.js"></script> <!-- radar -->
+<script type="text/javascript" src="initHelpers.js"></script> <!-- functions with widnows initializators -->
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/styles/atom-one-dark.min.css">
+</body>
+</html>
