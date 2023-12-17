@@ -15,4 +15,4 @@ As example app i use one test task "Task" and his code in other window "Task sol
 To run it locally on your own computer:
 Download repo, unpack it and run index.html
 
-<img src="https://imgur.com/HY2ulTG.png" alt="Build Status">
+<img height="300" width="300" src="https://imgur.com/HY2ulTG.png" alt="Build Status">
